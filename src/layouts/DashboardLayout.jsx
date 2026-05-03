@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router'
-import { LayoutDashboard, UserCircle, Menu, X, LogOut, DollarSign } from 'lucide-react'
+import { LayoutDashboard, UserCircle, Menu, X, LogOut, DollarSign, TrendingDown } from 'lucide-react'
 import { ThemeToggle, Tooltip } from '../components/ui'
 import useAuthStore from '../store/useAuthStore'
 import useExpenseStore from '../store/useExpenseStore'
 
 const navLinks = [
-  { to: '/dashboard',        icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/dashboard/perfil', icon: UserCircle,       label: 'Perfil' },
+  { to: '/dashboard',             icon: LayoutDashboard, label: 'Dashboard'    },
+  { to: '/dashboard/movimientos', icon: TrendingDown,    label: 'Movimientos'  },
+  { to: '/dashboard/perfil',      icon: UserCircle,      label: 'Perfil'       },
 ]
 
 const linkClass = ({ isActive }) =>
@@ -21,10 +22,10 @@ const linkClass = ({ isActive }) =>
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { user, logout } = useAuthStore()
-  const expenses = useExpenseStore((s) => s.expenses)
-  const navigate = useNavigate()
+  const movimientos = useExpenseStore((s) => s.movimientos)
+  const navigate    = useNavigate()
 
-  const totalGastado = expenses.reduce((acc, e) => acc + Number(e.monto ?? e.amount ?? 0), 0)
+  const totalGastado = movimientos.reduce((acc, m) => acc + Number(m.monto ?? 0), 0)
 
   const handleLogout = async () => {
     await logout()
@@ -74,7 +75,7 @@ export default function DashboardLayout() {
         {/* User info */}
         <div className="border-t border-gray-200 dark:border-gray-700 p-3">
           <p className="truncate text-xs font-medium text-gray-700 dark:text-gray-300">
-            {user?.nombre_completo ?? user?.email ?? 'Usuario'}
+            {user?.perfil?.nombre_completo ?? user?.email ?? 'Usuario'}
           </p>
           <p className="truncate text-xs text-gray-400">{user?.email}</p>
         </div>

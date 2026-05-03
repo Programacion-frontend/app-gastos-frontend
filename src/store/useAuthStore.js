@@ -16,14 +16,29 @@ const useAuthStore = create((set) => ({
   },
 
   login: async (credentials) => {
-    const { data } = await api.post('/auth/login', credentials)
-    set({ user: data, isAuthenticated: true })
+    // El backend devuelve { message: '...' } y setea la cookie HttpOnly
+    await api.post('/auth/login', credentials)
+    // Con la cookie ya activa, fetcheamos el usuario real
+    const { data } = await api.get('/auth/check-status')
+    set({ user: data, isAuthenticated: true, isCheckingAuth: false })
     return data
   },
 
   register: async (userData) => {
-    const { data } = await api.post('/auth/register', userData)
-    set({ user: data, isAuthenticated: true })
+    // El backend NO setea cookie al registrar — auto-login después
+    const payload = {
+      ...userData,
+      edad: userData.edad !== undefined ? String(userData.edad) : undefined,
+    }
+    await api.post('/auth/register', payload)
+    // Auto-login para obtener la cookie
+    await api.post('/auth/login', {
+      email: userData.email,
+      password: userData.password,
+    })
+    // Fetchear el usuario real con la cookie recién seteada
+    const { data } = await api.get('/auth/check-status')
+    set({ user: data, isAuthenticated: true, isCheckingAuth: false })
     return data
   },
 

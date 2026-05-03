@@ -1,74 +1,54 @@
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { Link, useNavigate } from 'react-router'
+import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
+import { Link, useNavigate } from 'react-router'
+import { z } from 'zod'
 
+import { Button, Input, Spinner, ThemeToggle } from '../components/ui'
 import useAuthStore from '../store/useAuthStore'
-import { Input, Button } from '../components/ui'
-import { ThemeToggle } from '../components/ui'
+import api from '../utils/axios'
 
 const schema = z.object({
-  nombre_completo: z
-    .string()
-    .min(3, 'El nombre debe tener al menos 3 caracteres'),
-  email: z
-    .string()
-    .min(1, 'El email es requerido')
-    .email('Email inválido'),
-  password: z
-    .string()
-    .min(6, 'La contraseña debe tener al menos 6 caracteres'),
-  edad: z
-    .coerce.number({ invalid_type_error: 'Debe ser un número' })
-    .int('Debe ser un número entero')
-    .min(1, 'La edad es requerida'),
-  telefono: z
-    .string()
-    .min(7, 'Teléfono inválido'),
-  rolId: z
-    .coerce.number({ invalid_type_error: 'Selecciona un rol' })
-    .min(1, 'Selecciona un rol'),
-  id_genero: z
-    .coerce.number({ invalid_type_error: 'Selecciona un género' })
-    .min(1, 'Selecciona un género'),
+  nombre_completo: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
+  email:           z.string().min(1, 'El email es requerido').email('Email inválido'),
+  password:        z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  edad:            z.string().regex(/^\d+$/, 'Debe ser un número').min(1, 'La edad es requerida'),
+  telefono:        z.string().min(7, 'Teléfono inválido'),
+  rolId:           z.coerce.number({ invalid_type_error: 'Selecciona un rol' }).min(1, 'Selecciona un rol'),
+  id_genero:       z.coerce.number({ invalid_type_error: 'Selecciona un género' }).min(1, 'Selecciona un género'),
 })
 
-const ROLES = [
-  { value: 1, label: 'Usuario' },
-  { value: 2, label: 'Administrador' },
-]
-
-const GENEROS = [
-  { value: 1, label: 'Masculino' },
-  { value: 2, label: 'Femenino' },
-  { value: 3, label: 'Otro' },
-]
-
-function SelectField({ id, label, error, children, ...props }) {
+function SelectField({ id, label, error, loading, children, ...props }) {
   return (
     <div className="flex flex-col gap-1">
       {label && (
-        <label
-          htmlFor={id}
-          className="text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
+        <label htmlFor={id} className="text-sm font-medium text-gray-700 dark:text-gray-300">
           {label}
         </label>
       )}
-      <select
-        id={id}
-        className={[
-          'w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors',
-          'bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100',
-          error
-            ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-            : 'border-gray-300 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 dark:border-gray-600',
-        ].join(' ')}
-        {...props}
-      >
-        {children}
-      </select>
+      <div className="relative">
+        <select
+          id={id}
+          disabled={loading}
+          className={[
+            'w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors appearance-none',
+            'bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100',
+            'disabled:opacity-50 disabled:cursor-not-allowed',
+            error
+              ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+              : 'border-gray-300 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 dark:border-gray-600',
+          ].join(' ')}
+          {...props}
+        >
+          {children}
+        </select>
+        {loading && (
+          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+            <Spinner size="sm" className="text-gray-400" />
+          </div>
+        )}
+      </div>
       {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
   )
@@ -77,6 +57,23 @@ function SelectField({ id, label, error, children, ...props }) {
 export default function RegisterPage() {
   const register_user = useAuthStore((s) => s.register)
   const navigate      = useNavigate()
+
+  const [roles,         setRoles]         = useState([])
+  const [generos,       setGeneros]       = useState([])
+  const [loadingCatalogos, setLoadingCatalogos] = useState(true)
+
+  useEffect(() => {
+    Promise.all([
+      api.get('/rol'),
+      api.get('/genero'),
+    ])
+      .then(([rolesRes, generosRes]) => {
+        setRoles(rolesRes.data)
+        setGeneros(generosRes.data)
+      })
+      .catch(() => toast.error('No se pudieron cargar los catálogos'))
+      .finally(() => setLoadingCatalogos(false))
+  }, [])
 
   const {
     register,
@@ -112,7 +109,7 @@ export default function RegisterPage() {
 
         <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 shadow-sm">
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-            {/* Fila 1: nombre completo */}
+
             <Input
               id="nombre_completo"
               label="Nombre completo"
@@ -123,7 +120,6 @@ export default function RegisterPage() {
               {...register('nombre_completo')}
             />
 
-            {/* Fila 2: email */}
             <Input
               id="email"
               label="Correo electrónico"
@@ -134,7 +130,6 @@ export default function RegisterPage() {
               {...register('email')}
             />
 
-            {/* Fila 3: password */}
             <Input
               id="password"
               label="Contraseña"
@@ -145,7 +140,6 @@ export default function RegisterPage() {
               {...register('password')}
             />
 
-            {/* Fila 4: edad + teléfono */}
             <div className="grid grid-cols-2 gap-3">
               <Input
                 id="edad"
@@ -167,29 +161,36 @@ export default function RegisterPage() {
               />
             </div>
 
-            {/* Fila 5: rol + género */}
             <div className="grid grid-cols-2 gap-3">
+              {/* Rol desde backend */}
               <SelectField
                 id="rolId"
                 label="Rol"
+                loading={loadingCatalogos}
                 error={errors.rolId?.message}
                 {...register('rolId')}
               >
                 <option value="">Seleccionar...</option>
-                {ROLES.map((r) => (
-                  <option key={r.value} value={r.value}>{r.label}</option>
+                {roles.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.nombre}
+                  </option>
                 ))}
               </SelectField>
 
+              {/* Género desde backend */}
               <SelectField
                 id="id_genero"
                 label="Género"
+                loading={loadingCatalogos}
                 error={errors.id_genero?.message}
                 {...register('id_genero')}
               >
                 <option value="">Seleccionar...</option>
-                {GENEROS.map((g) => (
-                  <option key={g.value} value={g.value}>{g.label}</option>
+                {generos.map((g) => (
+                  <option key={g.id_genero} value={g.id_genero}>
+                    {g.nombre}
+                  </option>
                 ))}
               </SelectField>
             </div>
@@ -198,7 +199,7 @@ export default function RegisterPage() {
               type="submit"
               className="w-full"
               isLoading={isSubmitting}
-              disabled={isSubmitting}
+              disabled={isSubmitting || loadingCatalogos}
             >
               {isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}
             </Button>
