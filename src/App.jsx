@@ -1,10 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router'
 import { Toaster } from 'react-hot-toast'
 
-import ProtectedRoute   from './components/ProtectedRoute'
+import ProtectedRoute   from './routes/ProtectedRoute'
 import DashboardLayout  from './layouts/DashboardLayout'
 
 import LandingPage      from './pages/LandingPage'
+import LoginPage        from './pages/LoginPage'
+import RegisterPage     from './pages/RegisterPage'
 import DashboardPage    from './pages/DashboardPage'
 import ProfilePage      from './pages/ProfilePage'
 
@@ -23,9 +25,8 @@ export default function App() {
         {/* Public */}
         <Route path="/" element={<LandingPage />} />
 
-        {/* Placeholder — se reemplazará en la Fase 5 */}
-        <Route path="/login"    element={<div className="p-10 text-center font-bold">Login (próxima fase)</div>} />
-        <Route path="/register" element={<div className="p-10 text-center font-bold">Register (próxima fase)</div>} />
+        <Route path="/login"    element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
         {/* Protected */}
         <Route element={<ProtectedRoute />}>
