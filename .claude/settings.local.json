@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm uninstall *)",
+      "Bash(mkdir -p components hooks store pages layouts)",
+      "Bash(touch components/.gitkeep hooks/.gitkeep store/.gitkeep layouts/.gitkeep pages/.gitkeep)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); const all={...p.dependencies,...p.devDependencies}; ['react-router','axios','zustand','react-hook-form','@hookform/resolvers','zod','lucide-react','react-icons','react-hot-toast','tailwindcss','postcss','autoprefixer'].forEach\\(d => console.log\\(d+':', all[d] || 'MISSING'\\)\\)\")"
+    ]
+  }
+}
