@@ -15,7 +15,6 @@ const schema = z.object({
   password:        z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
   edad:            z.string().regex(/^\d+$/, 'Debe ser un número').min(1, 'La edad es requerida'),
   telefono:        z.string().min(7, 'Teléfono inválido'),
-  rolId:           z.coerce.number({ invalid_type_error: 'Selecciona un rol' }).min(1, 'Selecciona un rol'),
   id_genero:       z.coerce.number({ invalid_type_error: 'Selecciona un género' }).min(1, 'Selecciona un género'),
 })
 
@@ -58,9 +57,9 @@ export default function RegisterPage() {
   const register_user = useAuthStore((s) => s.register)
   const navigate      = useNavigate()
 
-  const [roles,         setRoles]         = useState([])
-  const [generos,       setGeneros]       = useState([])
+  const [generos,          setGeneros]          = useState([])
   const [loadingCatalogos, setLoadingCatalogos] = useState(true)
+  const [rolUsuarioId,     setRolUsuarioId]     = useState(null)
 
   useEffect(() => {
     Promise.all([
@@ -68,7 +67,19 @@ export default function RegisterPage() {
       api.get('/genero'),
     ])
       .then(([rolesRes, generosRes]) => {
-        setRoles(rolesRes.data)
+        const roles = rolesRes.data
+
+        // Buscar el rol cuyo nombre sea "usuario" (sin distinguir mayúsculas)
+        const rolUsuario = roles.find(
+          (r) => r.nombre?.toLowerCase() === 'usuario'
+        )
+
+        if (rolUsuario) {
+          setRolUsuarioId(rolUsuario.id)
+        } else {
+          toast.error('No se encontró el rol de usuario en el sistema')
+        }
+
         setGeneros(generosRes.data)
       })
       .catch(() => toast.error('No se pudieron cargar los catálogos'))
@@ -82,8 +93,13 @@ export default function RegisterPage() {
   } = useForm({ resolver: zodResolver(schema) })
 
   const onSubmit = async (data) => {
+    if (!rolUsuarioId) {
+      toast.error('No se pudo determinar el rol de usuario. Intenta recargar la página.')
+      return
+    }
+
     try {
-      await register_user(data)
+      await register_user({ ...data, rolId: rolUsuarioId })
       toast.success('¡Cuenta creada exitosamente!')
       navigate('/dashboard', { replace: true })
     } catch (err) {
@@ -161,45 +177,27 @@ export default function RegisterPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {/* Rol desde backend */}
-              <SelectField
-                id="rolId"
-                label="Rol"
-                loading={loadingCatalogos}
-                error={errors.rolId?.message}
-                {...register('rolId')}
-              >
-                <option value="">Seleccionar...</option>
-                {roles.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.nombre}
-                  </option>
-                ))}
-              </SelectField>
-
-              {/* Género desde backend */}
-              <SelectField
-                id="id_genero"
-                label="Género"
-                loading={loadingCatalogos}
-                error={errors.id_genero?.message}
-                {...register('id_genero')}
-              >
-                <option value="">Seleccionar...</option>
-                {generos.map((g) => (
-                  <option key={g.id_genero} value={g.id_genero}>
-                    {g.nombre}
-                  </option>
-                ))}
-              </SelectField>
-            </div>
+            {/* Género desde backend */}
+            <SelectField
+              id="id_genero"
+              label="Género"
+              loading={loadingCatalogos}
+              error={errors.id_genero?.message}
+              {...register('id_genero')}
+            >
+              <option value="">Seleccionar...</option>
+              {generos.map((g) => (
+                <option key={g.id_genero} value={g.id_genero}>
+                  {g.nombre}
+                </option>
+              ))}
+            </SelectField>
 
             <Button
               type="submit"
               className="w-full"
               isLoading={isSubmitting}
-              disabled={isSubmitting || loadingCatalogos}
+              disabled={isSubmitting || loadingCatalogos || !rolUsuarioId}
             >
               {isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}
             </Button>

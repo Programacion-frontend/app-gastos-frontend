@@ -1,7 +1,7 @@
 /**
  * MovimientoForm — formulario compartido para crear / editar movimientos.
- * Filtra las categorías por `tipo` ('gasto' | 'ingreso') para que solo
- * aparezcan las pertinentes en cada contexto.
+ * Filtra las categorías por `tipo` ('gasto' | 'ingreso') y cuando se
+ * recibe `tipo`, selecciona automáticamente esa categoría sin permitir cambio.
  */
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -19,13 +19,18 @@ const schema = z.object({
 export default function MovimientoForm({
   defaultValues,
   categorias = [],
-  tipo,             // 'gasto' | 'ingreso' — filtra las categorías
+  tipo,             // 'gasto' | 'ingreso' — filtra y bloquea la categoría
   onSubmit,
   onCancel,
 }) {
+  // Filtra las categorías según el tipo recibido
   const categoriasDelTipo = tipo
     ? categorias.filter((c) => c.tipo_categoria?.toLowerCase() === tipo)
     : categorias
+
+  // Si hay tipo definido, tomar el id de la primera categoría que coincida
+  // (en modo edición se respeta el id_categoria que viene en defaultValues)
+  const categoriaFija = categoriasDelTipo[0]?.id_categoria ?? ''
 
   const {
     register,
@@ -33,7 +38,10 @@ export default function MovimientoForm({
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues ?? { fecha: new Date().toISOString().split('T')[0] },
+    defaultValues: defaultValues ?? {
+      fecha:        new Date().toISOString().split('T')[0],
+      id_categoria: categoriaFija,
+    },
   })
 
   const handleFormSubmit = async (data) => {
@@ -47,6 +55,9 @@ export default function MovimientoForm({
   }
 
   const isEditing = !!defaultValues
+
+  // La categoría se bloquea siempre que venga un `tipo` definido
+  const categoriaFijada = !!tipo
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} noValidate className="space-y-4">
@@ -84,16 +95,22 @@ export default function MovimientoForm({
         </label>
         <select
           id="id_categoria"
+          disabled={categoriaFijada}
           className={[
             'w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors',
             'bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100',
+            categoriaFijada
+              ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-700'
+              : '',
             errors.id_categoria
               ? 'border-red-500 focus:ring-1 focus:ring-red-500'
               : 'border-gray-300 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 dark:border-gray-600',
           ].join(' ')}
           {...register('id_categoria')}
         >
-          <option value="">Seleccionar categoría...</option>
+          {/* Si no hay tipo fijado, mostrar opción vacía inicial */}
+          {!categoriaFijada && <option value="">Seleccionar categoría...</option>}
+
           {categoriasDelTipo.map((c) => (
             <option key={c.id_categoria} value={c.id_categoria}>
               {c.tipo_categoria}
