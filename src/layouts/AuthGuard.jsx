@@ -18,5 +18,7 @@ export default function AuthGuard() {
     )
   }
 
+  // Si el interceptor de axios detectó un 401 y limpió el store,
+  // isAuthenticated pasará a false y este guard redirigirá automáticamente.
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />
 }

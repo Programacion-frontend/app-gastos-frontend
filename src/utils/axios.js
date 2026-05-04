@@ -1,8 +1,25 @@
 import axios from 'axios'
 
-const axiosInstance = axios.create({
+const api = axios.create({
   baseURL: 'http://localhost:8080/api',
   withCredentials: true,
 })
 
-export default axiosInstance
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      import('../store/useAuthStore').then(({ default: useAuthStore }) => {
+        const { isAuthenticated } = useAuthStore.getState()
+        if (isAuthenticated) {
+          useAuthStore.setState({ user: null, isAuthenticated: false })
+          window.location.replace('/login')
+        }
+      })
+    }
+    return Promise.reject(error)
+  }
+)
+
+export default api
