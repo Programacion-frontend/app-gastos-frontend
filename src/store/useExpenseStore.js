@@ -22,6 +22,18 @@ const useExpenseStore = create((set) => ({
     }
   },
 
+  // Solo ingresos
+  fetchIngresos: async (filters = {}) => {
+    set({ isLoading: true, error: null })
+    try {
+      const { data } = await api.get('/movimientos/ingresos', { params: filters })
+      set({ movimientos: data, isLoading: false })
+    } catch (err) {
+      const message = err.response?.data?.message ?? 'Error al cargar los ingresos'
+      set({ error: message, isLoading: false })
+    }
+  },
+
   // Solo gastos — para el dashboard
   fetchGastos: async (filters = {}) => {
     set({ isLoading: true, error: null })
