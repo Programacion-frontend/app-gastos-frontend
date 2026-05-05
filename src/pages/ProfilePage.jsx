@@ -5,23 +5,22 @@ export default function ProfilePage() {
   const { user } = useAuthStore()
   const perfil = user?.perfil
 
-  const nombre   = perfil?.nombre_completo ?? user?.email ?? 'Usuario'
-  const inicial  = nombre.charAt(0).toUpperCase()
-  const fotoUrl  = perfil?.foto_perfil
+  const nombre  = perfil?.nombre_completo ?? user?.email ?? 'Usuario'
+  const inicial = nombre.charAt(0).toUpperCase()
+  const fotoUrl = perfil?.foto_perfil
 
   const campos = [
-    { label: 'Email',     value: user?.email },
-    { label: 'Nombre',    value: perfil?.nombre_completo },
-    { label: 'Edad',      value: perfil?.edad },
-    { label: 'Teléfono',  value: perfil?.telefono },
-    { label: 'Género',    value: perfil?.genero?.nombre },
+    { label: 'Email',    value: user?.email },
+    { label: 'Nombre',   value: perfil?.nombre_completo },
+    { label: 'Edad',     value: perfil?.edad },
+    { label: 'Teléfono', value: perfil?.telefono },
+    { label: 'Género',   value: perfil?.genero?.nombre },
   ]
 
   return (
     <div className="flex justify-center">
       <div className="w-full max-w-md">
         <Card>
-          {/* ── Head: avatar + nombre ── */}
           <div className="flex flex-col items-center gap-3 border-b border-gray-100 dark:border-gray-700 pb-5 mb-5">
             {fotoUrl ? (
               <img
@@ -34,12 +33,9 @@ export default function ProfilePage() {
                 {inicial}
               </div>
             )}
-            <div className="text-center">
-              <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{nombre}</p>
-            </div>
+            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{nombre}</p>
           </div>
 
-          {/* ── Contenido: datos personales + email ── */}
           <dl className="space-y-3 text-sm">
             {campos.map(({ label, value }) => (
               <div key={label} className="flex items-center gap-3">

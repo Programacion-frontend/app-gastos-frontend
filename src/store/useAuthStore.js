@@ -12,8 +12,8 @@ const resetDataStores = async () => {
     import('./useCategoryStore'),
   ])
 
-  useExpenseStore.setState({ movimientos: [], isLoading: false, error: null })
-  useBalanceStore.setState({ balance: null, isLoading: false, isEmpty: false, error: null })
+  useExpenseStore.setState({ movimientos: [], isLoading: false })
+  useBalanceStore.setState({ balance: null, isLoading: false, isEmpty: false })
   useCategoryStore.setState({ categorias: [], isLoading: false })
 }
 

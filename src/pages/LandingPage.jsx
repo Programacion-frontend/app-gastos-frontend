@@ -64,7 +64,6 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 
-      {/* ── Navbar ───────────────────────────────────────── */}
       <header className="sticky top-0 z-40 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <div className="flex items-center gap-2">
@@ -83,7 +82,6 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* ── Hero ─────────────────────────────────────────── */}
       <section className="mx-auto max-w-4xl px-6 py-24 text-center">
         <span className="inline-block rounded-full bg-violet-100 dark:bg-violet-900/40 px-4 py-1 text-xs font-semibold text-violet-600 dark:text-violet-300 mb-6">
           Control financiero personal
@@ -99,18 +97,12 @@ export default function LandingPage() {
         </p>
         <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
           <Link to="/register">
-            <Button size="lg" className="w-full sm:w-auto px-8">
-              Empezar gratis ahora
-            </Button>
+            <Button size="lg" className="w-full sm:w-auto px-8">Empezar gratis ahora</Button>
           </Link>
           <Link to="/login">
-            <Button variant="secondary" size="lg" className="w-full sm:w-auto px-8">
-              Ya tengo cuenta
-            </Button>
+            <Button variant="secondary" size="lg" className="w-full sm:w-auto px-8">Ya tengo cuenta</Button>
           </Link>
         </div>
-
-        {/* Stats bar */}
         <div className="mx-auto mt-16 grid max-w-sm grid-cols-3 gap-6 sm:max-w-none sm:grid-cols-3">
           {stats.map(({ value, label }) => (
             <div key={label} className="text-center">
@@ -121,7 +113,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Sección: Control de presupuesto ──────────────── */}
       <section className="bg-gray-50 dark:bg-gray-800/50 py-20">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-12 text-center">
@@ -130,11 +121,9 @@ export default function LandingPage() {
               <span className="text-violet-600">controlar tu presupuesto</span>
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-gray-500 dark:text-gray-400">
-              Herramientas simples y efectivas diseñadas para que tomes mejores
-              decisiones financieras cada día.
+              Herramientas simples y efectivas diseñadas para que tomes mejores decisiones financieras cada día.
             </p>
           </div>
-
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {features.map(({ icon: Icon, title, desc, color, bg }) => (
               <div
@@ -144,32 +133,25 @@ export default function LandingPage() {
                 <div className={`mb-4 inline-flex rounded-xl p-3 ${bg}`}>
                   <Icon className={`text-2xl ${color}`} />
                 </div>
-                <h3 className="mb-2 font-semibold text-gray-900 dark:text-gray-100">
-                  {title}
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                  {desc}
-                </p>
+                <h3 className="mb-2 font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Sección: Hábitos financieros ─────────────────── */}
       <section className="py-20">
         <div className="mx-auto max-w-6xl px-6">
           <div className="flex flex-col lg:flex-row items-center gap-12">
-            {/* Text */}
             <div className="flex-1">
               <h2 className="text-3xl font-bold tracking-tight">
                 Pequeños cambios,{' '}
                 <span className="text-violet-600">grandes resultados</span>
               </h2>
               <p className="mt-4 text-gray-500 dark:text-gray-400 leading-relaxed">
-                El 78% de las personas que registran sus gastos logran ahorrar
-                más dinero al mes siguiente. Empieza hoy y descubre hacia
-                dónde va cada peso.
+                El 78% de las personas que registran sus gastos logran ahorrar más dinero al mes siguiente.
+                Empieza hoy y descubre hacia dónde va cada peso.
               </p>
               <ul className="mt-6 space-y-3">
                 {[
@@ -191,7 +173,6 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            {/* Visual card mockup */}
             <div className="flex-1 w-full max-w-sm lg:max-w-none">
               <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-xl">
                 <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
@@ -209,10 +190,7 @@ export default function LandingPage() {
                       <span className="text-gray-500 dark:text-gray-400">{amount}</span>
                     </div>
                     <div className="h-2 rounded-full bg-gray-100 dark:bg-gray-700">
-                      <div
-                        className={`h-2 rounded-full ${color}`}
-                        style={{ width: `${pct}%` }}
-                      />
+                      <div className={`h-2 rounded-full ${color}`} style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 ))}
@@ -226,23 +204,18 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── CTA final ────────────────────────────────────── */}
       <section className="bg-violet-600 py-16 text-center text-white">
         <h2 className="text-3xl font-bold">¿Listo para tomar el control?</h2>
         <p className="mx-auto mt-3 max-w-md text-violet-200">
           Únete y empieza a registrar tus gastos hoy mismo. Es gratis.
         </p>
         <Link to="/register" className="mt-8 inline-block">
-          <Button
-            size="lg"
-            className="bg-white !text-violet-700 hover:bg-violet-50 focus-visible:ring-white px-10"
-          >
+          <Button size="lg" className="bg-white !text-violet-700 hover:bg-violet-50 focus-visible:ring-white px-10">
             Comenzar ahora
           </Button>
         </Link>
       </section>
 
-      {/* ── Footer ───────────────────────────────────────── */}
       <footer className="border-t border-gray-200 dark:border-gray-700 py-6 text-center text-sm text-gray-400">
         © {new Date().getFullYear()} MiGasto · Control de finanzas personales
       </footer>

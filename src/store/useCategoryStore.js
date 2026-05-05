@@ -1,9 +1,6 @@
 import { create } from 'zustand'
 import api from '../utils/axios'
 
-// Entidad Categoria: { id_categoria, tipo_categoria }
-// GET /categoria — requiere JwtAuthGuard (cookie)
-
 const useCategoryStore = create((set) => ({
   categorias: [],
   isLoading: false,

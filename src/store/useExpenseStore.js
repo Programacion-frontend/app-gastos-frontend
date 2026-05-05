@@ -1,53 +1,44 @@
 import { create } from 'zustand'
 import api from '../utils/axios'
 
-// Entidad Movimiento: { id_movimiento, monto, fecha, descripcion?, categoria, moneda?, tags? }
-// CreateMovimientoDto:  { monto, fecha, descripcion?, id_categoria, id_moneda?, tags?, id_usuario? }
-// FilterMovimientoDto:  { termino?, fechaInicio?, fechaFin?, tags? }
-
 const useExpenseStore = create((set) => ({
   movimientos: [],
-  isLoading: false,
-  error: null,
+  isLoading:   false,
 
-  // Todos los movimientos del usuario (gastos + ingresos)
   fetchMovimientos: async (filters = {}) => {
-    set({ isLoading: true, error: null })
+    set({ isLoading: true })
     try {
       const { data } = await api.get('/movimientos', { params: filters })
       set({ movimientos: data, isLoading: false })
     } catch (err) {
-      const message = err.response?.data?.message ?? 'Error al cargar los movimientos'
-      set({ error: message, isLoading: false })
+      set({ isLoading: false })
+      throw err
     }
   },
 
-  // Solo ingresos
   fetchIngresos: async (filters = {}) => {
-    set({ isLoading: true, error: null })
+    set({ isLoading: true })
     try {
       const { data } = await api.get('/movimientos/ingresos', { params: filters })
       set({ movimientos: data, isLoading: false })
     } catch (err) {
-      const message = err.response?.data?.message ?? 'Error al cargar los ingresos'
-      set({ error: message, isLoading: false })
+      set({ isLoading: false })
+      throw err
     }
   },
 
-  // Solo gastos — para el dashboard
   fetchGastos: async (filters = {}) => {
-    set({ isLoading: true, error: null })
+    set({ isLoading: true })
     try {
       const { data } = await api.get('/movimientos/gastos', { params: filters })
       set({ movimientos: data, isLoading: false })
     } catch (err) {
-      const message = err.response?.data?.message ?? 'Error al cargar los gastos'
-      set({ error: message, isLoading: false })
+      set({ isLoading: false })
+      throw err
     }
   },
 
   createMovimiento: async (movimientoData) => {
-    // { monto, fecha (YYYY-MM-DD), descripcion?, id_categoria, id_moneda? }
     const { data } = await api.post('/movimientos', movimientoData)
     set((state) => ({ movimientos: [data, ...state.movimientos] }))
     return data

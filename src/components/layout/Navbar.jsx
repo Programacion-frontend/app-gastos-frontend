@@ -14,7 +14,6 @@ export default function Navbar({ onOpenSidebar }) {
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 dark:border-gray-700 dark:bg-gray-800">
-      {/* Izquierda: hamburger + título */}
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenSidebar}
@@ -28,7 +27,6 @@ export default function Navbar({ onOpenSidebar }) {
         </span>
       </div>
 
-      {/* Derecha: tema + cerrar sesión */}
       <div className="flex items-center gap-1">
         <ThemeToggle />
         <Tooltip text="Cerrar sesión" position="bottom">

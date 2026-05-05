@@ -1,15 +1,13 @@
 import { create } from 'zustand'
 import api from '../utils/axios'
 
-
 const useBalanceStore = create((set) => ({
-  balance: null,    
+  balance:   null,
   isLoading: false,
-  isEmpty: false,   
-  error: null,
+  isEmpty:   false,
 
   fetchBalance: async ({ mes, anio } = {}) => {
-    set({ isLoading: true, error: null, isEmpty: false })
+    set({ isLoading: true, isEmpty: false })
     try {
       const params = {}
       if (mes)  params.mes  = mes
@@ -20,8 +18,8 @@ const useBalanceStore = create((set) => ({
       if (err.response?.status === 404) {
         set({ balance: null, isEmpty: true, isLoading: false })
       } else {
-        const message = err.response?.data?.message ?? 'Error al cargar el balance'
-        set({ error: message, isLoading: false })
+        set({ isLoading: false })
+        throw err
       }
     }
   },

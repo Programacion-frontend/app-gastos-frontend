@@ -1,10 +1,3 @@
-/**
- * Table — componente de tabla reutilizable
- *
- * columns: Array<{ key: string, label: string, render?: (row) => ReactNode, className?: string }>
- * rows:    Array<object>
- * rowKey:  string | ((row) => string|number)  — clave única por fila
- */
 export default function Table({ columns = [], rows = [], rowKey = 'id', emptyMessage = 'Sin datos' }) {
   const getKey = typeof rowKey === 'function' ? rowKey : (r) => r[rowKey]
 

@@ -5,8 +5,7 @@ import { Link, useNavigate } from 'react-router'
 import toast from 'react-hot-toast'
 
 import useAuthStore from '../store/useAuthStore'
-import { Input, Button } from '../components/ui'
-import { ThemeToggle } from '../components/ui'
+import { Input, Button, ThemeToggle } from '../components/ui'
 
 const schema = z.object({
   email:    z.string().min(1, 'El email es requerido').email('Email inválido'),
@@ -41,12 +40,9 @@ export default function LoginPage() {
       </div>
 
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="mb-8 text-center">
           <span className="text-2xl font-bold text-violet-600">MiGasto</span>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Ingresa a tu cuenta
-          </p>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Ingresa a tu cuenta</p>
         </div>
 
         <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 shadow-sm">
@@ -60,7 +56,6 @@ export default function LoginPage() {
               error={errors.email?.message}
               {...register('email')}
             />
-
             <Input
               id="password"
               label="Contraseña"
@@ -70,13 +65,7 @@ export default function LoginPage() {
               error={errors.password?.message}
               {...register('password')}
             />
-
-            <Button
-              type="submit"
-              className="w-full"
-              isLoading={isSubmitting}
-              disabled={isSubmitting}
-            >
+            <Button type="submit" className="w-full" isLoading={isSubmitting} disabled={isSubmitting}>
               {isSubmitting ? 'Ingresando...' : 'Iniciar sesión'}
             </Button>
           </form>
@@ -84,10 +73,7 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
           ¿No tienes cuenta?{' '}
-          <Link
-            to="/register"
-            className="font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400"
-          >
+          <Link to="/register" className="font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400">
             Regístrate
           </Link>
         </p>

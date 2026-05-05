@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -9,13 +9,13 @@ import useExpenseStore  from '../store/useExpenseStore'
 import useCategoryStore from '../store/useCategoryStore'
 import { Card, Badge, Button, Modal, Input, Spinner } from '../components/ui'
 
-// ─── Zod schema — mapea exactamente el CreateMovimientoDto ───
+// ─── Zod schema ───────────────────────────────────────────────
 const schema = z.object({
-  monto:       z.coerce.number({ invalid_type_error: 'Ingresa un monto válido' }).positive('El monto debe ser mayor a 0'),
-  fecha:       z.string().min(1, 'La fecha es requerida').regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato: YYYY-MM-DD'),
-  descripcion: z.string().optional(),
+  monto:        z.coerce.number({ invalid_type_error: 'Ingresa un monto válido' }).positive('El monto debe ser mayor a 0'),
+  fecha:        z.string().min(1, 'La fecha es requerida').regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato: YYYY-MM-DD'),
+  descripcion:  z.string().optional(),
   id_categoria: z.coerce.number({ invalid_type_error: 'Selecciona una categoría' }).min(1, 'La categoría es requerida'),
-  id_moneda:   z.coerce.number().optional().nullable(),
+  id_moneda:    z.coerce.number().optional().nullable(),
 })
 
 // ─── Colores por tipo_categoria ───────────────────────────────
@@ -43,9 +43,9 @@ function SkeletonRow() {
 
 // ─── Movimiento row card ──────────────────────────────────────
 function MovimientoCard({ movimiento, onEdit, onDelete }) {
-  const tipo  = movimiento.categoria?.tipo_categoria ?? 'Sin categoría'
-  const color = categoryColor(tipo)
-  const monto = Number(movimiento.monto ?? 0)
+  const tipo    = movimiento.categoria?.tipo_categoria ?? 'Sin categoría'
+  const color   = categoryColor(tipo)
+  const monto   = Number(movimiento.monto ?? 0)
   const isGasto = tipo.toLowerCase().includes('gasto')
 
   return (
@@ -133,7 +133,6 @@ function MovimientoForm({ defaultValues, categorias, onSubmit, onCancel }) {
         {...register('descripcion')}
       />
 
-      {/* Categoría */}
       <div className="flex flex-col gap-1">
         <label htmlFor="id_categoria" className="text-sm font-medium text-gray-700 dark:text-gray-300">
           Categoría <span className="text-red-500">*</span>
@@ -203,7 +202,6 @@ export default function MovimientosPage() {
   const {
     movimientos,
     isLoading,
-    error,
     fetchMovimientos,
     createMovimiento,
     updateMovimiento,
@@ -212,39 +210,55 @@ export default function MovimientosPage() {
 
   const { categorias, fetchCategorias } = useCategoryStore()
 
-  // UI state
-  const [modalMode,  setModalMode]  = useState(null)   // 'create' | 'edit' | 'delete'
-  const [selected,   setSelected]   = useState(null)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [modalMode,   setModalMode]   = useState(null)
+  const [selected,    setSelected]    = useState(null)
+  const [isDeleting,  setIsDeleting]  = useState(false)
+  const [loadError,   setLoadError]   = useState(false)
 
-  // Filters
   const [termino,     setTermino]     = useState('')
   const [fechaInicio, setFechaInicio] = useState('')
   const [fechaFin,    setFechaFin]    = useState('')
 
-  useEffect(() => {
-    fetchMovimientos()
-    fetchCategorias()
-  }, [])
+  // ── load: solo para filtros (applyFilters / clearFilters) ─────
+  const load = useCallback((params = {}) => {
+    setLoadError(false)
+    fetchMovimientos(params).catch((err) => {
+      const msg = err.response?.data?.message ?? 'Error al cargar los movimientos'
+      toast.error(Array.isArray(msg) ? msg[0] : msg)
+      setLoadError(true)
+    })
+  }, [fetchMovimientos])
 
+  // ── Carga inicial — con flag cancelled para evitar doble toast ─
   useEffect(() => {
-    if (error) toast.error(error)
-  }, [error])
+    let cancelled = false
+
+    setLoadError(false)
+    fetchMovimientos().catch((err) => {
+      if (cancelled) return
+      const msg = err.response?.data?.message ?? 'Error al cargar los movimientos'
+      toast.error(Array.isArray(msg) ? msg[0] : msg)
+      setLoadError(true)
+    })
+    fetchCategorias()
+
+    return () => { cancelled = true }
+  }, [])
 
   const applyFilters = () => {
     const params = {}
-    if (termino.trim())  params.termino    = termino.trim()
-    if (fechaInicio)     params.fechaInicio = fechaInicio
-    if (fechaFin)        params.fechaFin    = fechaFin
-    fetchMovimientos(params)
+    if (termino.trim())  params.termino     = termino.trim()
+    if (fechaInicio)     params.fechaInicio  = fechaInicio
+    if (fechaFin)        params.fechaFin     = fechaFin
+    load(params)
   }
 
   const clearFilters = () => {
     setTermino(''); setFechaInicio(''); setFechaFin('')
-    fetchMovimientos()
+    load()
   }
 
-  // ── Create ──
+  // ── CRUD ──────────────────────────────────────────────────────
   const handleCreate = async (formData) => {
     try {
       const payload = {
@@ -263,7 +277,6 @@ export default function MovimientosPage() {
     }
   }
 
-  // ── Edit ──
   const handleEdit = async (formData) => {
     try {
       const payload = {
@@ -282,7 +295,6 @@ export default function MovimientosPage() {
     }
   }
 
-  // ── Delete ──
   const handleDelete = async () => {
     setIsDeleting(true)
     try {
@@ -297,22 +309,10 @@ export default function MovimientosPage() {
     }
   }
 
-  const openEdit = (m) => {
-    setSelected(m)
-    setModalMode('edit')
-  }
+  const openEdit   = (m) => { setSelected(m); setModalMode('edit') }
+  const openDelete = (m) => { setSelected(m); setModalMode('delete') }
+  const closeModal = () =>  { setModalMode(null); setSelected(null) }
 
-  const openDelete = (m) => {
-    setSelected(m)
-    setModalMode('delete')
-  }
-
-  const closeModal = () => {
-    setModalMode(null)
-    setSelected(null)
-  }
-
-  // Defaults para el formulario de edición
   const editDefaults = selected
     ? {
         monto:        selected.monto,
@@ -329,9 +329,7 @@ export default function MovimientosPage() {
     <div>
       {/* Header */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Movimientos
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Movimientos</h1>
         <Button onClick={() => setModalMode('create')}>
           <Plus size={16} /> Nuevo movimiento
         </Button>
@@ -402,19 +400,19 @@ export default function MovimientosPage() {
         </div>
       )}
 
-      {!isLoading && error && (
+      {!isLoading && loadError && (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
           <AlertCircle className="h-10 w-10 text-red-400" />
           <p className="font-medium text-gray-700 dark:text-gray-300">
             No se pudieron cargar los movimientos
           </p>
-          <Button variant="secondary" size="sm" onClick={() => fetchMovimientos()}>
+          <Button variant="secondary" size="sm" onClick={() => load()}>
             Reintentar
           </Button>
         </div>
       )}
 
-      {!isLoading && !error && movimientos.length === 0 && (
+      {!isLoading && !loadError && movimientos.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-20 text-center">
           <SlidersHorizontal className="h-12 w-12 text-gray-300 dark:text-gray-600" />
           <p className="font-medium text-gray-600 dark:text-gray-400">
@@ -426,7 +424,7 @@ export default function MovimientosPage() {
         </div>
       )}
 
-      {!isLoading && !error && movimientos.length > 0 && (
+      {!isLoading && !loadError && movimientos.length > 0 && (
         <div className="space-y-2">
           {movimientos.map((m) => (
             <MovimientoCard
@@ -440,26 +438,12 @@ export default function MovimientosPage() {
       )}
 
       {/* Modal: Create */}
-      <Modal
-        isOpen={modalMode === 'create'}
-        onClose={closeModal}
-        title="Nuevo movimiento"
-        size="md"
-      >
-        <MovimientoForm
-          categorias={categorias}
-          onSubmit={handleCreate}
-          onCancel={closeModal}
-        />
+      <Modal isOpen={modalMode === 'create'} onClose={closeModal} title="Nuevo movimiento" size="md">
+        <MovimientoForm categorias={categorias} onSubmit={handleCreate} onCancel={closeModal} />
       </Modal>
 
       {/* Modal: Edit */}
-      <Modal
-        isOpen={modalMode === 'edit'}
-        onClose={closeModal}
-        title="Editar movimiento"
-        size="md"
-      >
+      <Modal isOpen={modalMode === 'edit'} onClose={closeModal} title="Editar movimiento" size="md">
         {selected && (
           <MovimientoForm
             key={selected.id_movimiento}
@@ -472,12 +456,7 @@ export default function MovimientosPage() {
       </Modal>
 
       {/* Modal: Delete confirm */}
-      <Modal
-        isOpen={modalMode === 'delete'}
-        onClose={closeModal}
-        title="Eliminar movimiento"
-        size="sm"
-      >
+      <Modal isOpen={modalMode === 'delete'} onClose={closeModal} title="Eliminar movimiento" size="sm">
         {selected && (
           <DeleteConfirm
             movimiento={selected}

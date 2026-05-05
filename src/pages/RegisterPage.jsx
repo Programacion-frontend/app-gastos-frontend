@@ -62,24 +62,14 @@ export default function RegisterPage() {
   const [rolUsuarioId,     setRolUsuarioId]     = useState(null)
 
   useEffect(() => {
-    Promise.all([
-      api.get('/rol'),
-      api.get('/genero'),
-    ])
+    Promise.all([api.get('/rol'), api.get('/genero')])
       .then(([rolesRes, generosRes]) => {
-        const roles = rolesRes.data
-
-        // Buscar el rol cuyo nombre sea "usuario" (sin distinguir mayúsculas)
-        const rolUsuario = roles.find(
-          (r) => r.nombre?.toLowerCase() === 'usuario'
-        )
-
+        const rolUsuario = rolesRes.data.find((r) => r.nombre?.toLowerCase() === 'usuario')
         if (rolUsuario) {
           setRolUsuarioId(rolUsuario.id)
         } else {
           toast.error('No se encontró el rol de usuario en el sistema')
         }
-
         setGeneros(generosRes.data)
       })
       .catch(() => toast.error('No se pudieron cargar los catálogos'))
@@ -97,7 +87,6 @@ export default function RegisterPage() {
       toast.error('No se pudo determinar el rol de usuario. Intenta recargar la página.')
       return
     }
-
     try {
       await register_user({ ...data, rolId: rolUsuarioId })
       toast.success('¡Cuenta creada exitosamente!')
@@ -115,17 +104,13 @@ export default function RegisterPage() {
       </div>
 
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="mb-8 text-center">
           <span className="text-2xl font-bold text-violet-600">MiGasto</span>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Crea tu cuenta gratuita
-          </p>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Crea tu cuenta gratuita</p>
         </div>
 
         <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 shadow-sm">
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-
             <Input
               id="nombre_completo"
               label="Nombre completo"
@@ -135,7 +120,6 @@ export default function RegisterPage() {
               error={errors.nombre_completo?.message}
               {...register('nombre_completo')}
             />
-
             <Input
               id="email"
               label="Correo electrónico"
@@ -145,7 +129,6 @@ export default function RegisterPage() {
               error={errors.email?.message}
               {...register('email')}
             />
-
             <Input
               id="password"
               label="Contraseña"
@@ -155,7 +138,6 @@ export default function RegisterPage() {
               error={errors.password?.message}
               {...register('password')}
             />
-
             <div className="grid grid-cols-2 gap-3">
               <Input
                 id="edad"
@@ -176,8 +158,6 @@ export default function RegisterPage() {
                 {...register('telefono')}
               />
             </div>
-
-            {/* Género desde backend */}
             <SelectField
               id="id_genero"
               label="Género"
@@ -187,12 +167,9 @@ export default function RegisterPage() {
             >
               <option value="">Seleccionar...</option>
               {generos.map((g) => (
-                <option key={g.id_genero} value={g.id_genero}>
-                  {g.nombre}
-                </option>
+                <option key={g.id_genero} value={g.id_genero}>{g.nombre}</option>
               ))}
             </SelectField>
-
             <Button
               type="submit"
               className="w-full"
@@ -206,10 +183,7 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
           ¿Ya tienes cuenta?{' '}
-          <Link
-            to="/login"
-            className="font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400"
-          >
+          <Link to="/login" className="font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400">
             Inicia sesión
           </Link>
         </p>

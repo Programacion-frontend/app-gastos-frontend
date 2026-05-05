@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-import useExpenseStore   from '../store/useExpenseStore'
-import useCategoryStore  from '../store/useCategoryStore'
+import useExpenseStore  from '../store/useExpenseStore'
+import useCategoryStore from '../store/useCategoryStore'
 import { Card, Button, Modal, Spinner, Table, Tooltip } from '../components/ui'
-import MovimientoForm    from '../components/MovimientoForm'
+import MovimientoForm   from '../components/MovimientoForm'
 
-// ── Confirm delete ──────────────────────────────────────────
 function DeleteConfirm({ movimiento, onConfirm, onCancel, isDeleting }) {
   return (
     <div className="space-y-4">
@@ -28,30 +27,35 @@ function DeleteConfirm({ movimiento, onConfirm, onCancel, isDeleting }) {
   )
 }
 
-// ── Main ───────────────────────────────────────────────────
 export default function GastosPage() {
   const {
-    movimientos, isLoading, error,
+    movimientos, isLoading,
     fetchGastos, createMovimiento, updateMovimiento, deleteMovimiento,
   } = useExpenseStore()
 
   const { categorias, fetchCategorias } = useCategoryStore()
 
-  const [modalMode,  setModalMode]  = useState(null)   // 'create' | 'edit' | 'delete'
+  const [modalMode,  setModalMode]  = useState(null)
   const [selected,   setSelected]   = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [search,     setSearch]     = useState('')
 
-  useEffect(() => { fetchGastos(); fetchCategorias() }, [])
-  useEffect(() => { if (error) toast.error(error) }, [error])
+  useEffect(() => {
+    let cancelled = false
+    fetchGastos().catch((err) => {
+      if (cancelled) return
+      const msg = err.response?.data?.message ?? 'Error al cargar los gastos'
+      toast.error(Array.isArray(msg) ? msg[0] : msg)
+    })
+    fetchCategorias()
+    return () => { cancelled = true }
+  }, [])
 
-  // ── Filtro local por descripción ──
   const rows = movimientos.filter((m) =>
     !search.trim() ||
     (m.descripcion ?? '').toLowerCase().includes(search.toLowerCase())
   )
 
-  // ── CRUD handlers ──
   const handleCreate = async (data) => {
     try {
       await createMovimiento(data)
@@ -88,9 +92,9 @@ export default function GastosPage() {
     }
   }
 
-  const openEdit = (m) => { setSelected(m); setModalMode('edit') }
+  const openEdit   = (m) => { setSelected(m); setModalMode('edit') }
   const openDelete = (m) => { setSelected(m); setModalMode('delete') }
-  const closeModal = () => { setModalMode(null); setSelected(null) }
+  const closeModal = () =>  { setModalMode(null); setSelected(null) }
 
   const editDefaults = selected ? {
     monto:        selected.monto,
@@ -100,7 +104,6 @@ export default function GastosPage() {
     id_moneda:    selected.moneda?.id_moneda ?? '',
   } : undefined
 
-  // ── Columnas de la tabla ──
   const columns = [
     {
       key: 'descripcion',
@@ -185,12 +188,9 @@ export default function GastosPage() {
 
   return (
     <div>
-      {/* Header */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Gestión de Gastos
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestión de Gastos</h1>
           <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
             {rows.length} {rows.length === 1 ? 'registro' : 'registros'}
             {search && ` · Filtrando por "${search}"`}
@@ -201,7 +201,6 @@ export default function GastosPage() {
         </Button>
       </div>
 
-      {/* Search */}
       <Card className="mb-4">
         <div className="relative">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -215,7 +214,6 @@ export default function GastosPage() {
         </div>
       </Card>
 
-      {/* Tabla */}
       <Card>
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
@@ -226,16 +224,11 @@ export default function GastosPage() {
             columns={columns}
             rows={rows}
             rowKey="id_movimiento"
-            emptyMessage={
-              search
-                ? `Sin resultados para "${search}"`
-                : 'No hay gastos registrados. ¡Agrega tu primer gasto!'
-            }
+            emptyMessage={search ? `Sin resultados para "${search}"` : 'No hay gastos registrados. ¡Agrega tu primer gasto!'}
           />
         )}
       </Card>
 
-      {/* Totales */}
       {rows.length > 0 && (
         <div className="mt-3 flex justify-end">
           <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 px-4 py-2">
@@ -247,12 +240,10 @@ export default function GastosPage() {
         </div>
       )}
 
-      {/* Modal: crear */}
       <Modal isOpen={modalMode === 'create'} onClose={closeModal} title="Nuevo gasto" size="md">
         <MovimientoForm tipo="gasto" categorias={categorias} onSubmit={handleCreate} onCancel={closeModal} />
       </Modal>
 
-      {/* Modal: editar */}
       <Modal isOpen={modalMode === 'edit'} onClose={closeModal} title="Editar gasto" size="md">
         {selected && (
           <MovimientoForm
@@ -266,7 +257,6 @@ export default function GastosPage() {
         )}
       </Modal>
 
-      {/* Modal: eliminar */}
       <Modal isOpen={modalMode === 'delete'} onClose={closeModal} title="Eliminar gasto" size="sm">
         {selected && (
           <DeleteConfirm

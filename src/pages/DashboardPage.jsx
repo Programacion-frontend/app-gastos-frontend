@@ -1,25 +1,14 @@
 import {
-  AlertCircle,
-  ArrowDownRight,
-  ArrowUpRight,
-  Plus,
-  TrendingDown, TrendingUp, Wallet,
+  AlertCircle, ArrowDownRight, ArrowUpRight,
+  Plus, TrendingDown, TrendingUp, Wallet,
 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Link, useNavigate } from 'react-router'
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Sector,
-  Tooltip,
-  XAxis, YAxis,
+  Bar, BarChart, CartesianGrid, Cell, Legend,
+  Pie, PieChart, ResponsiveContainer, Sector,
+  Tooltip, XAxis, YAxis,
 } from 'recharts'
 
 import { Button, Card, Modal, Table } from '../components/ui'
@@ -27,10 +16,9 @@ import useBalanceStore from '../store/useBalanceStore'
 import useCategoryStore from '../store/useCategoryStore'
 import useExpenseStore from '../store/useExpenseStore'
 
-// ─── Constantes ────────────────────────────────────────────────
 const CURRENT_YEAR  = new Date().getFullYear()
 const CURRENT_MONTH = new Date().getMonth() + 1
-const CHART_COLORS  = { ingresos: '#22c55e', gastos: '#ef4444', balance: '#7c3aed' }
+const CHART_COLORS  = { ingresos: '#22c55e', gastos: '#ef4444' }
 const PIE_COLORS    = [CHART_COLORS.ingresos, CHART_COLORS.gastos]
 
 const PERIODOS = [
@@ -39,26 +27,19 @@ const PERIODOS = [
   { label: 'Todo',     mes: undefined,     anio: undefined    },
 ]
 
-// ─── Helpers ───────────────────────────────────────────────────
 const fmt = (n = 0) => `$${Number(n).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
-// ─── useDarkMode hook ──────────────────────────────────────────
 function useDarkMode() {
-  const [isDark, setIsDark] = useState(() =>
-    document.documentElement.classList.contains('dark')
-  )
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'))
   useEffect(() => {
     const el = document.documentElement
-    const observer = new MutationObserver(() => {
-      setIsDark(el.classList.contains('dark'))
-    })
+    const observer = new MutationObserver(() => setIsDark(el.classList.contains('dark')))
     observer.observe(el, { attributeFilter: ['class'] })
     return () => observer.disconnect()
   }, [])
   return isDark
 }
 
-// ─── Skeleton ──────────────────────────────────────────────────
 function SkeletonCard() {
   return (
     <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 animate-pulse">
@@ -68,6 +49,7 @@ function SkeletonCard() {
     </div>
   )
 }
+
 function SkeletonChart() {
   return (
     <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 animate-pulse">
@@ -77,7 +59,6 @@ function SkeletonChart() {
   )
 }
 
-// ─── Stat card ─────────────────────────────────────────────────
 function StatCard({ label, value, sub, icon: Icon, trend, colorClass, onClick }) {
   return (
     <Card onClick={onClick}>
@@ -101,7 +82,6 @@ function StatCard({ label, value, sub, icon: Icon, trend, colorClass, onClick })
   )
 }
 
-// ─── Custom tooltip ────────────────────────────────────────────
 const ChartTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
   return (
@@ -117,9 +97,8 @@ const ChartTooltip = ({ active, payload, label }) => {
   )
 }
 
-// ─── Main page ─────────────────────────────────────────────────
 export default function DashboardPage() {
-  const { balance, isLoading: loadingBal, isEmpty, error: errorBal, fetchBalance } = useBalanceStore()
+  const { balance, isLoading: loadingBal, isEmpty, fetchBalance } = useBalanceStore()
   const { movimientos, fetchMovimientos } = useExpenseStore()
   const { fetchCategorias } = useCategoryStore()
 
@@ -131,71 +110,52 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const { mes, anio } = PERIODOS[periodo]
 
-  // ─── Dark-mode-aware pie active shape ─────────────────────────
   const renderActiveShape = useCallback((props) => {
     const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload, value } = props
     const textColor = isDark ? '#f3f4f6' : '#111827'
     const subColor  = isDark ? '#9ca3af' : '#6b7280'
     return (
       <g>
-        <text
-          x={cx} y={cy - 10}
-          textAnchor="middle"
-          fill={textColor}
-          fontSize={13}
-          fontWeight={600}
-          fontFamily="inherit"
-        >
+        <text x={cx} y={cy - 10} textAnchor="middle" fill={textColor} fontSize={13} fontWeight={600} fontFamily="inherit">
           {payload.name}
         </text>
-        <text
-          x={cx} y={cy + 14}
-          textAnchor="middle"
-          fill={subColor}
-          fontSize={13}
-          fontFamily="inherit"
-        >
+        <text x={cx} y={cy + 14} textAnchor="middle" fill={subColor} fontSize={13} fontFamily="inherit">
           {fmt(value)}
         </text>
-        <Sector
-          cx={cx} cy={cy}
-          innerRadius={innerRadius} outerRadius={outerRadius + 6}
-          startAngle={startAngle} endAngle={endAngle}
-          fill={fill}
-        />
-        <Sector
-          cx={cx} cy={cy}
-          innerRadius={outerRadius + 10} outerRadius={outerRadius + 14}
-          startAngle={startAngle} endAngle={endAngle}
-          fill={fill}
-        />
+        <Sector cx={cx} cy={cy} innerRadius={innerRadius} outerRadius={outerRadius + 6} startAngle={startAngle} endAngle={endAngle} fill={fill} />
+        <Sector cx={cx} cy={cy} innerRadius={outerRadius + 10} outerRadius={outerRadius + 14} startAngle={startAngle} endAngle={endAngle} fill={fill} />
       </g>
     )
   }, [isDark])
 
-  useEffect(() => { fetchBalance({ mes, anio }) }, [periodo])
+  useEffect(() => {
+    let cancelled = false
+    fetchBalance({ mes, anio }).catch((err) => {
+      if (cancelled) return
+      const msg = err.response?.data?.message ?? 'Error al cargar el balance'
+      toast.error(Array.isArray(msg) ? msg[0] : msg)
+    })
+    return () => { cancelled = true }
+  }, [periodo])
 
   useEffect(() => {
-    fetchMovimientos()
+    let cancelled = false
+    fetchMovimientos().catch((err) => {
+      if (cancelled) return
+      const msg = err.response?.data?.message ?? 'Error al cargar los movimientos'
+      toast.error(Array.isArray(msg) ? msg[0] : msg)
+    })
     fetchCategorias()
+    return () => { cancelled = true }
   }, [])
 
-  useEffect(() => {
-    if (errorBal) toast.error(errorBal)
-  }, [errorBal])
-
   const b = balance
+  const recientes = [...movimientos].sort((a, z) => new Date(z.fecha) - new Date(a.fecha)).slice(0, 5)
 
-  const recientes = [...movimientos]
-    .sort((a, z) => new Date(z.fecha) - new Date(a.fecha))
-    .slice(0, 5)
+  const gridColor  = isDark ? '#374151' : '#e5e7eb'
+  const tickColor  = isDark ? '#9ca3af' : '#6b7280'
+  const cursorFill = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'
 
-  // ─── Chart theme values ────────────────────────────────────────
-  const gridColor   = isDark ? '#374151' : '#e5e7eb'
-  const tickColor   = isDark ? '#9ca3af' : '#6b7280'
-  const cursorFill  = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'
-
-  // ─── Últimos movimientos columns (sin acciones) ────────────────
   const recentColumns = [
     {
       key: 'descripcion',
@@ -263,7 +223,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* ── Header ─────────────────────────────────────────── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
@@ -273,7 +232,6 @@ export default function DashboardPage() {
               : 'Resumen financiero'}
           </p>
         </div>
-
         <div className="flex items-center gap-2">
           <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-sm">
             {PERIODOS.map((p, i) => (
@@ -291,13 +249,9 @@ export default function DashboardPage() {
               </button>
             ))}
           </div>
-          <Button size="sm" onClick={() => setModalOpen(true)}>
-            <Plus size={14} /> Nuevo
-          </Button>
         </div>
       </div>
 
-      {/* ── Stat cards ─────────────────────────────────────── */}
       {loadingBal ? (
         <div className="grid gap-4 sm:grid-cols-3">
           <SkeletonCard /><SkeletonCard /><SkeletonCard />
@@ -305,9 +259,7 @@ export default function DashboardPage() {
       ) : isEmpty ? (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-gray-200 dark:border-gray-700 py-12 text-center">
           <Wallet className="h-10 w-10 text-gray-300 dark:text-gray-600" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Sin movimientos en el período seleccionado
-          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Sin movimientos en el período seleccionado</p>
         </div>
       ) : b ? (
         <div className="grid gap-4 sm:grid-cols-3">
@@ -340,15 +292,12 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
-      {/* ── Charts ─────────────────────────────────────────── */}
       {loadingBal ? (
         <div className="grid gap-4 lg:grid-cols-2">
           <SkeletonChart /><SkeletonChart />
         </div>
       ) : b && !isEmpty && (
         <div className="grid gap-4 lg:grid-cols-2">
-
-          {/* Pie: Distribución */}
           <Card>
             <Card.Header>
               <Card.Title>Distribución</Card.Title>
@@ -388,7 +337,6 @@ export default function DashboardPage() {
             </Card.Body>
           </Card>
 
-          {/* Bar: Comparativo mensual */}
           <Card>
             <Card.Header>
               <Card.Title>Comparativo mensual</Card.Title>
@@ -414,15 +362,11 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── Últimos movimientos ─────────────────────────────── */}
       <Card>
         <Card.Header>
           <Card.Title>Últimos movimientos</Card.Title>
           {recientes.length > 0 && (
-            <Link
-              to="/dashboard/movimientos"
-              className="text-xs text-violet-600 hover:underline dark:text-violet-400"
-            >
+            <Link to="/dashboard/movimientos" className="text-xs text-violet-600 hover:underline dark:text-violet-400">
               Ver todos →
             </Link>
           )}
@@ -437,24 +381,16 @@ export default function DashboardPage() {
               </Button>
             </div>
           ) : (
-            <Table
-              columns={recentColumns}
-              rows={recientes}
-              rowKey="id_movimiento"
-              emptyMessage="No hay movimientos registrados aún"
-            />
+            <Table columns={recentColumns} rows={recientes} rowKey="id_movimiento" emptyMessage="No hay movimientos registrados aún" />
           )}
         </Card.Body>
       </Card>
 
-      {/* ── Modal placeholder ───────────────────────────────── */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo movimiento" size="md">
         <div className="flex flex-col items-center gap-4 py-6 text-center">
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Usa la página de{' '}
-            <Link to="/dashboard/movimientos" className="text-violet-600 hover:underline">
-              Movimientos
-            </Link>{' '}
+            <Link to="/dashboard/movimientos" className="text-violet-600 hover:underline">Movimientos</Link>{' '}
             para crear registros.
           </p>
           <Button variant="secondary" onClick={() => setModalOpen(false)}>Cerrar</Button>

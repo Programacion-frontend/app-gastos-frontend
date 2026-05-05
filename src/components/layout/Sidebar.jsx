@@ -23,7 +23,6 @@ export default function Sidebar({ isOpen, onClose }) {
 
   return (
     <>
-      {/* Overlay oscuro en móvil */}
       {isOpen && (
         <div
           className="fixed inset-0 z-20 bg-black/40 lg:hidden"
@@ -39,7 +38,6 @@ export default function Sidebar({ isOpen, onClose }) {
           'lg:static lg:translate-x-0',
         ].join(' ')}
       >
-        {/* Logo */}
         <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
           <span className="text-lg font-bold text-violet-600">MiGasto</span>
           <button
@@ -50,7 +48,6 @@ export default function Sidebar({ isOpen, onClose }) {
           </button>
         </div>
 
-        {/* Nav links */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           {navLinks.map(({ to, icon: Icon, label }) => (
             <NavLink key={to} to={to} end={to === '/dashboard'} className={linkClass}>
@@ -60,7 +57,6 @@ export default function Sidebar({ isOpen, onClose }) {
           ))}
         </nav>
 
-        {/* Info del usuario */}
         <div className="border-t border-gray-200 dark:border-gray-700 p-3">
           <p className="truncate text-xs font-medium text-gray-700 dark:text-gray-300">
             {user?.perfil?.nombre_completo ?? user?.email ?? 'Usuario'}
