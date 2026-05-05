@@ -1,9 +1,6 @@
 import { create } from 'zustand'
 import api from '../utils/axios'
 
-// ── Limpieza de todos los stores de datos ────────────────────────
-// Se importan de forma lazy para evitar dependencias circulares.
-// Se llama tanto en logout como en login para garantizar estado limpio.
 const resetDataStores = async () => {
   const [
     { default: useExpenseStore },

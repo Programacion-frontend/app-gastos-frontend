@@ -1,14 +1,11 @@
 import { create } from 'zustand'
 import api from '../utils/axios'
 
-// GET /movimientos/balance?mes=&anio=
-// Respuesta: { totalGastos, totalIngresos, balance, resumen, estadisticas, graficas: { circular, barras } }
-// Lanza 404 si no hay movimientos — se trata como "sin datos", no como error grave.
 
 const useBalanceStore = create((set) => ({
-  balance: null,      // null = sin datos todavía
+  balance: null,    
   isLoading: false,
-  isEmpty: false,     // true cuando el backend responde 404 (sin movimientos)
+  isEmpty: false,   
   error: null,
 
   fetchBalance: async ({ mes, anio } = {}) => {
@@ -21,7 +18,6 @@ const useBalanceStore = create((set) => ({
       set({ balance: data, isLoading: false })
     } catch (err) {
       if (err.response?.status === 404) {
-        // Sin movimientos — estado vacío, no es un error de red
         set({ balance: null, isEmpty: true, isLoading: false })
       } else {
         const message = err.response?.data?.message ?? 'Error al cargar el balance'
