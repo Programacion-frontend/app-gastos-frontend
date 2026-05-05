@@ -2,8 +2,7 @@ import {
   AlertCircle, ArrowDownRight, ArrowUpRight,
   Plus, TrendingDown, TrendingUp, Wallet,
 } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
+import { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import {
   Bar, BarChart, CartesianGrid, Cell, Legend,
@@ -12,9 +11,10 @@ import {
 } from 'recharts'
 
 import { Button, Card, Modal, Table } from '../components/ui'
-import useBalanceStore from '../store/useBalanceStore'
+import useBalanceStore  from '../store/useBalanceStore'
 import useCategoryStore from '../store/useCategoryStore'
-import useExpenseStore from '../store/useExpenseStore'
+import useExpenseStore  from '../store/useExpenseStore'
+import { useFetch, useDarkMode } from '../hooks'
 
 const CURRENT_YEAR  = new Date().getFullYear()
 const CURRENT_MONTH = new Date().getMonth() + 1
@@ -28,17 +28,6 @@ const PERIODOS = [
 ]
 
 const fmt = (n = 0) => `$${Number(n).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-
-function useDarkMode() {
-  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'))
-  useEffect(() => {
-    const el = document.documentElement
-    const observer = new MutationObserver(() => setIsDark(el.classList.contains('dark')))
-    observer.observe(el, { attributeFilter: ['class'] })
-    return () => observer.disconnect()
-  }, [])
-  return isDark
-}
 
 function SkeletonCard() {
   return (
@@ -110,6 +99,14 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const { mes, anio } = PERIODOS[periodo]
 
+  useFetch(
+    useCallback(() => fetchBalance({ mes, anio }), [periodo]),
+    { fallback: 'Error al cargar el balance', deps: [periodo] }
+  )
+
+  useFetch(fetchMovimientos, { fallback: 'Error al cargar los movimientos' })
+  useFetch(fetchCategorias)
+
   const renderActiveShape = useCallback((props) => {
     const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload, value } = props
     const textColor = isDark ? '#f3f4f6' : '#111827'
@@ -127,27 +124,6 @@ export default function DashboardPage() {
       </g>
     )
   }, [isDark])
-
-  useEffect(() => {
-    let cancelled = false
-    fetchBalance({ mes, anio }).catch((err) => {
-      if (cancelled) return
-      const msg = err.response?.data?.message ?? 'Error al cargar el balance'
-      toast.error(Array.isArray(msg) ? msg[0] : msg)
-    })
-    return () => { cancelled = true }
-  }, [periodo])
-
-  useEffect(() => {
-    let cancelled = false
-    fetchMovimientos().catch((err) => {
-      if (cancelled) return
-      const msg = err.response?.data?.message ?? 'Error al cargar los movimientos'
-      toast.error(Array.isArray(msg) ? msg[0] : msg)
-    })
-    fetchCategorias()
-    return () => { cancelled = true }
-  }, [])
 
   const b = balance
   const recientes = [...movimientos].sort((a, z) => new Date(z.fecha) - new Date(a.fecha)).slice(0, 5)
@@ -249,6 +225,9 @@ export default function DashboardPage() {
               </button>
             ))}
           </div>
+          <Button size="sm" onClick={() => setModalOpen(true)}>
+            <Plus size={14} /> Nuevo
+          </Button>
         </div>
       </div>
 

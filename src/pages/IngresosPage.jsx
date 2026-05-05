@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Plus, Pencil, Trash2, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -6,6 +6,7 @@ import useExpenseStore  from '../store/useExpenseStore'
 import useCategoryStore from '../store/useCategoryStore'
 import { Card, Button, Modal, Spinner, Table, Tooltip } from '../components/ui'
 import MovimientoForm   from '../components/MovimientoForm'
+import { useFetch, useModal, useErrorToast } from '../hooks'
 
 function DeleteConfirm({ movimiento, onConfirm, onCancel, isDeleting }) {
   return (
@@ -35,21 +36,16 @@ export default function IngresosPage() {
 
   const { categorias, fetchCategorias } = useCategoryStore()
 
-  const [modalMode,  setModalMode]  = useState(null)
-  const [selected,   setSelected]   = useState(null)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [search,     setSearch]     = useState('')
+  const errorToast = useErrorToast()
+  const {
+    modalMode, selected, isDeleting, setIsDeleting,
+    openCreate, openEdit, openDelete, closeModal,
+  } = useModal()
 
-  useEffect(() => {
-    let cancelled = false
-    fetchIngresos().catch((err) => {
-      if (cancelled) return
-      const msg = err.response?.data?.message ?? 'Error al cargar los ingresos'
-      toast.error(Array.isArray(msg) ? msg[0] : msg)
-    })
-    fetchCategorias()
-    return () => { cancelled = true }
-  }, [])
+  const [search, setSearch] = useState('')
+
+  useFetch(fetchIngresos, { fallback: 'Error al cargar los ingresos' })
+  useFetch(fetchCategorias)
 
   const rows = movimientos.filter((m) =>
     !search.trim() ||
@@ -60,10 +56,9 @@ export default function IngresosPage() {
     try {
       await createMovimiento(data)
       toast.success('Ingreso creado')
-      setModalMode(null)
+      closeModal()
     } catch (err) {
-      const msg = err.response?.data?.message ?? 'Error al crear'
-      toast.error(Array.isArray(msg) ? msg[0] : msg)
+      errorToast(err, 'Error al crear')
     }
   }
 
@@ -71,10 +66,9 @@ export default function IngresosPage() {
     try {
       await updateMovimiento(selected.id_movimiento, data)
       toast.success('Ingreso actualizado')
-      setModalMode(null); setSelected(null)
+      closeModal()
     } catch (err) {
-      const msg = err.response?.data?.message ?? 'Error al actualizar'
-      toast.error(Array.isArray(msg) ? msg[0] : msg)
+      errorToast(err, 'Error al actualizar')
     }
   }
 
@@ -83,18 +77,13 @@ export default function IngresosPage() {
     try {
       await deleteMovimiento(selected.id_movimiento)
       toast.success('Ingreso eliminado')
-      setModalMode(null); setSelected(null)
+      closeModal()
     } catch (err) {
-      const msg = err.response?.data?.message ?? 'Error al eliminar'
-      toast.error(Array.isArray(msg) ? msg[0] : msg)
+      errorToast(err, 'Error al eliminar')
     } finally {
       setIsDeleting(false)
     }
   }
-
-  const openEdit   = (m) => { setSelected(m); setModalMode('edit') }
-  const openDelete = (m) => { setSelected(m); setModalMode('delete') }
-  const closeModal = () =>  { setModalMode(null); setSelected(null) }
 
   const editDefaults = selected ? {
     monto:        selected.monto,
@@ -196,7 +185,7 @@ export default function IngresosPage() {
             {search && ` · Filtrando por "${search}"`}
           </p>
         </div>
-        <Button onClick={() => setModalMode('create')}>
+        <Button onClick={openCreate}>
           <Plus size={16} /> Nuevo ingreso
         </Button>
       </div>
