@@ -26,7 +26,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' })
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm animate-overlay-in"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -35,13 +35,14 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' })
         aria-modal="true"
         aria-labelledby="modal-title"
         className={[
-          'relative w-full rounded-2xl shadow-xl',
+          'relative flex max-h-[90vh] w-full flex-col rounded-2xl shadow-2xl ring-1 ring-black/5',
           'bg-white dark:bg-gray-800',
           'border border-gray-200 dark:border-gray-700',
+          'animate-panel-in',
           sizeMap[size],
         ].join(' ')}
       >
-        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700">
+        <div className="flex items-center justify-between gap-4 border-b border-gray-200 px-5 py-4 dark:border-gray-700">
           <h2
             id="modal-title"
             className="text-base font-semibold text-gray-900 dark:text-gray-100"
@@ -51,12 +52,12 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' })
           <button
             onClick={onClose}
             aria-label="Cerrar modal"
-            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-200 transition-colors"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-200 transition-colors"
           >
             <X size={18} />
           </button>
         </div>
-        <div className="px-5 py-4">{children}</div>
+        <div className="overflow-y-auto px-5 py-5">{children}</div>
       </div>
     </div>
   )

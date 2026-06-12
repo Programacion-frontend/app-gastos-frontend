@@ -88,7 +88,7 @@ export default function GastosPage() {
           <Tooltip text="Editar" position="top">
             <button
               onClick={() => openEdit(m)}
-              className="rounded-lg p-1.5 text-gray-400 hover:bg-violet-50 hover:text-violet-600 dark:hover:bg-violet-900/30 dark:hover:text-violet-400 transition-colors"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-violet-50 hover:text-violet-600 dark:hover:bg-violet-900/30 dark:hover:text-violet-400 transition-colors"
             >
               <Pencil size={15} />
             </button>
@@ -96,7 +96,7 @@ export default function GastosPage() {
           <Tooltip text="Eliminar" position="top">
             <button
               onClick={() => openDelete(m)}
-              className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors"
             >
               <Trash2 size={15} />
             </button>

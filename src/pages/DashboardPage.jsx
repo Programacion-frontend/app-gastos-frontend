@@ -2,7 +2,7 @@ import {
   AlertCircle, ArrowDownRight, ArrowUpRight,
   Plus, TrendingDown, TrendingUp, Wallet,
 } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import {
   Bar, BarChart, CartesianGrid, Cell, Legend,
@@ -10,11 +10,13 @@ import {
   Tooltip, XAxis, YAxis,
 } from 'recharts'
 
-import { Button, Card, Modal, Table } from '../components/ui'
+import { Button, Card, Modal, Table, Tooltip as UiTooltip } from '../components/ui'
 import useBalanceStore  from '../store/useBalanceStore'
 import useCategoryStore from '../store/useCategoryStore'
 import useExpenseStore  from '../store/useExpenseStore'
 import { useFetch, useDarkMode } from '../hooks'
+import { formatMoney, formatCompact } from '../utils/format'
+import { buildComparativo, RANGOS } from '../utils/periods'
 
 const CURRENT_YEAR  = new Date().getFullYear()
 const CURRENT_MONTH = new Date().getMonth() + 1
@@ -27,7 +29,7 @@ const PERIODOS = [
   { label: 'Todo',     mes: undefined,     anio: undefined    },
 ]
 
-const fmt = (n = 0) => `$${Number(n).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+const fmt = formatMoney
 
 function SkeletonCard() {
   return (
@@ -48,16 +50,21 @@ function SkeletonChart() {
   )
 }
 
-function StatCard({ label, value, sub, icon: Icon, trend, colorClass, onClick }) {
+function StatCard({ label, amount, sub, icon: Icon, trend, colorClass, onClick }) {
   return (
     <Card onClick={onClick}>
-      <div className="flex items-start justify-between">
-        <div>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
           <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{value}</p>
-          {sub && <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{sub}</p>}
+          {/* Cifra abreviada para no descuadrar la tarjeta; valor completo en el tooltip. */}
+          <UiTooltip text={fmt(amount)} position="bottom">
+            <p className="mt-1 truncate text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums cursor-default">
+              {formatCompact(amount)}
+            </p>
+          </UiTooltip>
+          {sub && <p className="mt-1 text-xs text-gray-400 dark:text-gray-500 truncate">{sub}</p>}
         </div>
-        <div className={`rounded-xl p-3 ${colorClass}`}>
+        <div className={`shrink-0 rounded-xl p-3 ${colorClass}`}>
           <Icon className="h-5 w-5" />
         </div>
       </div>
@@ -94,6 +101,7 @@ export default function DashboardPage() {
   const [periodo,   setPeriodo]   = useState(0)
   const [pieIndex,  setPieIndex]  = useState(0)
   const [modalOpen, setModalOpen] = useState(false)
+  const [rango,     setRango]     = useState('mensual')
 
   const isDark   = useDarkMode()
   const navigate = useNavigate()
@@ -127,6 +135,11 @@ export default function DashboardPage() {
 
   const b = balance
   const recientes = [...movimientos].sort((a, z) => new Date(z.fecha) - new Date(a.fecha)).slice(0, 5)
+
+  // Comparativo por rango (diario/semanal/quincenal/mensual) calculado en el
+  // cliente a partir de los movimientos ya cargados.
+  const comparativo = useMemo(() => buildComparativo(movimientos, rango), [movimientos, rango])
+  const comparativoVacio = comparativo.every((d) => d.ingresos === 0 && d.gastos === 0)
 
   const gridColor  = isDark ? '#374151' : '#e5e7eb'
   const tickColor  = isDark ? '#9ca3af' : '#6b7280'
@@ -244,7 +257,7 @@ export default function DashboardPage() {
         <div className="grid gap-4 sm:grid-cols-3">
           <StatCard
             label="Total Gastos"
-            value={fmt(b.totalGastos)}
+            amount={b.totalGastos}
             sub={`${b.estadisticas.cantidadGastos} movimientos · Prom: ${fmt(b.estadisticas.promedioGasto)}`}
             icon={TrendingDown}
             colorClass="bg-red-100 text-red-500 dark:bg-red-900/30"
@@ -252,7 +265,7 @@ export default function DashboardPage() {
           />
           <StatCard
             label="Total Ingresos"
-            value={fmt(b.totalIngresos)}
+            amount={b.totalIngresos}
             sub={`${b.estadisticas.cantidadIngresos} movimientos · Prom: ${fmt(b.estadisticas.promedioIngreso)}`}
             icon={TrendingUp}
             colorClass="bg-green-100 text-green-500 dark:bg-green-900/30"
@@ -260,7 +273,7 @@ export default function DashboardPage() {
           />
           <StatCard
             label="Balance"
-            value={fmt(b.balance)}
+            amount={b.balance}
             sub={b.resumen}
             icon={Wallet}
             trend={b.balance}
@@ -317,18 +330,36 @@ export default function DashboardPage() {
           </Card>
 
           <Card>
-            <Card.Header>
-              <Card.Title>Comparativo mensual</Card.Title>
+            <Card.Header className="flex-wrap gap-2">
+              <Card.Title>Comparativo</Card.Title>
+              <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-xs">
+                {RANGOS.map((r) => (
+                  <button
+                    key={r.value}
+                    onClick={() => setRango(r.value)}
+                    className={[
+                      'px-2.5 py-1 transition-colors',
+                      rango === r.value
+                        ? 'bg-violet-600 text-white'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700',
+                    ].join(' ')}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
             </Card.Header>
             <Card.Body>
-              {!b.graficas.barras?.length ? (
-                <div className="flex h-52 items-center justify-center text-sm text-gray-400">Sin datos mensuales</div>
+              {comparativoVacio ? (
+                <div className="flex h-52 items-center justify-center text-sm text-gray-400">
+                  Sin datos en este rango
+                </div>
               ) : (
                 <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={b.graficas.barras} barGap={2} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                  <BarChart data={comparativo} barGap={2} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: tickColor }} />
-                    <YAxis tick={{ fontSize: 11, fill: tickColor }} tickFormatter={(v) => `$${v}`} width={60} />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: tickColor }} interval="preserveStartEnd" />
+                    <YAxis tick={{ fontSize: 11, fill: tickColor }} tickFormatter={(v) => formatCompact(v)} width={56} />
                     <Tooltip content={<ChartTooltip />} cursor={{ fill: cursorFill }} />
                     <Legend wrapperStyle={{ fontSize: 12, color: tickColor }} />
                     <Bar dataKey="ingresos" fill={CHART_COLORS.ingresos} radius={[3,3,0,0]} name="Ingresos" />

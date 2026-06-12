@@ -54,14 +54,14 @@ function MovimientoCard({ movimiento, onEdit, onDelete }) {
         <button
           onClick={() => onEdit(movimiento)}
           aria-label="Editar"
-          className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-200 transition-colors"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-200 transition-colors"
         >
           <Pencil size={15} />
         </button>
         <button
           onClick={() => onDelete(movimiento)}
           aria-label="Eliminar"
-          className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 transition-colors"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 transition-colors"
         >
           <Trash2 size={15} />
         </button>
