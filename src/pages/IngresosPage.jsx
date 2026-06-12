@@ -156,7 +156,6 @@ export default function IngresosPage() {
         <div className="mt-3 flex justify-end">
           <div className="flex min-w-0 items-center gap-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 px-4 py-2">
             <span className="shrink-0 text-sm text-gray-600 dark:text-gray-400">Total:</span>
-            {/* Cifra abreviada para no descuadrar la tarjeta; valor completo en el tooltip. */}
             <Tooltip text={`+${formatMoney(total)}`} position="top">
               <span className="max-w-[10rem] truncate text-base font-bold text-gray-900 dark:text-gray-100 tabular-nums cursor-default">
                 +{formatCompact(total)}

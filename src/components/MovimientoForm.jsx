@@ -1,4 +1,5 @@
-import { useForm } from 'react-hook-form'
+import { useEffect } from 'react'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Input, Button } from './ui'
@@ -14,6 +15,7 @@ const schema = z.object({
 export default function MovimientoForm({
   defaultValues,
   categorias = [],
+  monedas = [],
   tipo,
   onSubmit,
   onCancel,
@@ -29,6 +31,8 @@ export default function MovimientoForm({
   const {
     register,
     handleSubmit,
+    setValue,
+    control,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(schema),
@@ -37,6 +41,14 @@ export default function MovimientoForm({
       id_categoria: categoriaFija,
     },
   })
+
+  const idMoneda = useWatch({ control, name: 'id_moneda' })
+
+  useEffect(() => {
+    if (!idMoneda && monedas.length > 0) {
+      setValue('id_moneda', monedas[0].id_moneda)
+    }
+  }, [idMoneda, monedas, setValue])
 
   const handleFormSubmit = async (data) => {
     await onSubmit({
@@ -68,6 +80,30 @@ export default function MovimientoForm({
           {...register('fecha')}
         />
       </div>
+
+      {monedas.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Moneda</span>
+          <div className="flex w-fit overflow-hidden rounded-lg border border-gray-300 dark:border-gray-600 text-sm">
+            {monedas.map((m) => (
+              <button
+                key={m.id_moneda}
+                type="button"
+                onClick={() => setValue('id_moneda', m.id_moneda)}
+                className={[
+                  'px-3 py-1.5 font-medium transition-colors',
+                  Number(idMoneda) === m.id_moneda
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700',
+                ].join(' ')}
+              >
+                {m.simbolo} {m.codigo}
+              </button>
+            ))}
+          </div>
+          <input type="hidden" {...register('id_moneda')} />
+        </div>
+      )}
 
       <Input
         id="descripcion"

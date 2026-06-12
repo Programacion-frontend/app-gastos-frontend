@@ -1,9 +1,5 @@
 import Button from './Button'
 
-/**
- * Diálogo de confirmación reutilizable (p. ej. para eliminar registros).
- * Se renderiza dentro de un <Modal>; solo aporta el cuerpo: mensaje + acciones.
- */
 export default function ConfirmDialog({
   description,
   confirmLabel = 'Eliminar',

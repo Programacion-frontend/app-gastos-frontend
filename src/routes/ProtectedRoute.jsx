@@ -5,8 +5,6 @@ import Spinner from '../components/ui/Spinner'
 export default function ProtectedRoute() {
   const { isAuthenticated, isCheckingAuth } = useAuthStore()
 
-  // Si ya hay una sesión persistida mostramos la app de inmediato; la validación
-  // en segundo plano (checkSession) redirigirá a /login solo si dejó de ser válida.
   if (isCheckingAuth && !isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface dark:bg-gray-900">

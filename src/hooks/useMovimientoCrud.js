@@ -6,7 +6,6 @@ import { useErrorToast } from './useErrorToast'
 
 const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1)
 
-/** Convierte un movimiento del backend en los valores por defecto del formulario. */
 const toFormDefaults = (m) =>
   m
     ? {
@@ -18,15 +17,6 @@ const toFormDefaults = (m) =>
       }
     : undefined
 
-/**
- * Encapsula la lógica CRUD de movimientos (crear / editar / eliminar) que antes
- * estaba duplicada en MovimientosPage, GastosPage e IngresosPage.
- *
- * Devuelve el estado del modal (useModal) + los handlers ya conectados al store
- * y los valores por defecto para el formulario de edición.
- *
- * @param {{ label: string }} options - etiqueta singular ('gasto', 'ingreso', 'movimiento')
- */
 export function useMovimientoCrud({ label }) {
   const { createMovimiento, updateMovimiento, deleteMovimiento } = useExpenseStore()
   const errorToast = useErrorToast()

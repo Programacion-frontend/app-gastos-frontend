@@ -1,20 +1,16 @@
 import { Modal, ConfirmDialog } from './ui'
 import MovimientoForm from './MovimientoForm'
+import useMonedaStore from '../store/useMonedaStore'
+import { useFetch } from '../hooks'
 
-/**
- * Conjunto reutilizable de modales (crear / editar / eliminar) para movimientos.
- * Antes este bloque estaba duplicado en MovimientosPage, GastosPage e IngresosPage.
- *
- * @param {string}  tipo       - 'gasto' | 'ingreso' | undefined (todos)
- * @param {string}  label      - etiqueta singular para los títulos ('gasto', 'movimiento'...)
- * @param {Array}   categorias - catálogo de categorías
- * @param {object}  crud       - retorno de useMovimientoCrud
- */
 export default function MovimientoModals({ tipo, label, categorias, crud }) {
   const {
     modalMode, selected, isDeleting,
     closeModal, handleCreate, handleEdit, handleDelete, editDefaults,
   } = crud
+
+  const { monedas, fetchMonedas } = useMonedaStore()
+  useFetch(fetchMonedas)
 
   return (
     <>
@@ -22,6 +18,7 @@ export default function MovimientoModals({ tipo, label, categorias, crud }) {
         <MovimientoForm
           tipo={tipo}
           categorias={categorias}
+          monedas={monedas}
           onSubmit={handleCreate}
           onCancel={closeModal}
         />
@@ -33,6 +30,7 @@ export default function MovimientoModals({ tipo, label, categorias, crud }) {
             key={selected.id_movimiento}
             tipo={tipo}
             categorias={categorias}
+            monedas={monedas}
             defaultValues={editDefaults}
             onSubmit={handleEdit}
             onCancel={closeModal}

@@ -20,7 +20,6 @@ import { buildComparativo, RANGOS } from '../utils/periods'
 
 const CURRENT_YEAR  = new Date().getFullYear()
 const CURRENT_MONTH = new Date().getMonth() + 1
-// Ingresos en azul (primario) y gastos en gris neutro.
 const CHART_COLORS = {
   light: { ingresos: '#2563eb', gastos: '#64748b' },
   dark:  { ingresos: '#3b82f6', gastos: '#94a3b8' },
@@ -59,7 +58,6 @@ function StatCard({ label, amount, sub, icon: Icon, trend, colorClass, onClick }
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
-          {/* Cifra abreviada para no descuadrar la tarjeta; valor completo en el tooltip. */}
           <UiTooltip text={fmt(amount)} position="bottom">
             <p className="mt-1 truncate text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums cursor-default">
               {formatCompact(amount)}
@@ -139,8 +137,6 @@ export default function DashboardPage() {
   const b = balance
   const recientes = [...movimientos].sort((a, z) => new Date(z.fecha) - new Date(a.fecha)).slice(0, 5)
 
-  // Comparativo por rango (diario/semanal/quincenal/mensual) calculado en el
-  // cliente a partir de los movimientos ya cargados.
   const comparativo = useMemo(() => buildComparativo(movimientos, rango), [movimientos, rango])
   const comparativoVacio = comparativo.every((d) => d.ingresos === 0 && d.gastos === 0)
 

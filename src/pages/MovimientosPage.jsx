@@ -12,8 +12,6 @@ const PALETTE = ['violet', 'green', 'yellow', 'orange', 'pink']
 const colorCache = {}
 let colorIdx = 0
 const categoryColor = (tipo) => {
-  // Ingresos siempre en azul (primario) y gastos en gris neutro;
-  // el resto de categorías rota sobre la paleta.
   const t = tipo.toLowerCase()
   if (t.includes('gasto')) return 'gray'
   if (t.includes('ingreso')) return 'blue'
@@ -54,7 +52,6 @@ function MovimientoCard({ movimiento, onEdit, onDelete }) {
         </p>
       </div>
       <Badge label={tipo} color={color} className="hidden sm:inline-flex shrink-0" />
-      {/* Cifra abreviada para no descuadrar la tarjeta; valor completo en el tooltip. */}
       <Tooltip text={`${isGasto ? '-' : '+'}${formatMoney(monto, simbolo)}`} position="top">
         <span className="max-w-[7rem] truncate text-base font-bold shrink-0 cursor-default text-gray-900 dark:text-gray-100">
           {isGasto ? '-' : '+'}{formatCompact(monto, { symbol: simbolo })}
@@ -173,7 +170,6 @@ export default function MovimientosPage() {
       {movimientos.length > 0 && (
         <div className="mb-4 flex min-w-0 items-center justify-between gap-3 text-sm text-gray-500 dark:text-gray-400">
           <span className="shrink-0">{movimientos.length} movimientos encontrados</span>
-          {/* Cifra abreviada para no descuadrar; valor completo en el tooltip. */}
           <Tooltip text={`Total: ${formatMoney(total)}`} position="top">
             <span className="max-w-[10rem] truncate font-medium text-gray-900 dark:text-gray-100 cursor-default">
               Total: {formatCompact(total)}

@@ -1,11 +1,3 @@
-/**
- * Agrupa movimientos en "buckets" temporales para comparar finanzas en
- * distintos rangos: diario, semanal, quincenal y mensual.
- *
- * Devuelve siempre el shape que consume el BarChart del dashboard:
- *   [{ name, ingresos, gastos }]
- */
-
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 
 export const RANGOS = [
@@ -23,7 +15,6 @@ const startOfDay = (d) => {
 
 const dd = (d) => String(d.getDate()).padStart(2, '0')
 
-/** Parsea "YYYY-MM-DD" (o Date) a fecha LOCAL para evitar corrimientos de zona horaria. */
 const parseFecha = (f) => {
   if (f instanceof Date) return startOfDay(f)
   const m = String(f).match(/^(\d{4})-(\d{2})-(\d{2})/)
@@ -31,7 +22,6 @@ const parseFecha = (f) => {
   return startOfDay(new Date(f))
 }
 
-/** Genera los buckets ordenados (más antiguo -> más reciente) para un rango. */
 function bucketsFor(rango, now = new Date()) {
   const today = startOfDay(now)
   const buckets = []
@@ -43,7 +33,7 @@ function bucketsFor(rango, now = new Date()) {
       buckets.push({ start, end, name: `${dd(start)} ${MESES[start.getMonth()]}` })
     }
   } else if (rango === 'semanal') {
-    const dow = (today.getDay() + 6) % 7 // 0 = lunes
+    const dow = (today.getDay() + 6) % 7
     const thisMonday = new Date(today); thisMonday.setDate(today.getDate() - dow)
     for (let i = 7; i >= 0; i--) {
       const start = new Date(thisMonday); start.setDate(thisMonday.getDate() - i * 7)
@@ -51,7 +41,6 @@ function bucketsFor(rango, now = new Date()) {
       buckets.push({ start, end, name: `${dd(start)} ${MESES[start.getMonth()]}` })
     }
   } else if (rango === 'quincenal') {
-    // Últimos 4 meses, 2 quincenas por mes (1-15 y 16-fin).
     for (let m = 3; m >= 0; m--) {
       const ref = new Date(today.getFullYear(), today.getMonth() - m, 1)
       const y = ref.getFullYear(), mo = ref.getMonth()
@@ -59,7 +48,6 @@ function bucketsFor(rango, now = new Date()) {
       buckets.push({ start: new Date(y, mo, 16), end: new Date(y, mo + 1, 1), name: `16+ ${MESES[mo]}` })
     }
   } else {
-    // mensual: últimos 6 meses
     for (let m = 5; m >= 0; m--) {
       const ref = new Date(today.getFullYear(), today.getMonth() - m, 1)
       buckets.push({
@@ -73,11 +61,6 @@ function bucketsFor(rango, now = new Date()) {
   return buckets
 }
 
-/**
- * @param {Array} movimientos - lista con { fecha, monto, categoria.tipo_categoria }
- * @param {'diario'|'semanal'|'quincenal'|'mensual'} rango
- * @param {Date} [now] - inyectable para pruebas
- */
 export function buildComparativo(movimientos = [], rango = 'mensual', now = new Date()) {
   const buckets = bucketsFor(rango, now).map((b) => ({ ...b, ingresos: 0, gastos: 0 }))
 

@@ -1,16 +1,6 @@
 import { create } from 'zustand'
 import api from '../utils/axios'
 
-/**
- * `movimientos` es un arreglo compartido por las páginas de Movimientos,
- * Ingresos y Gastos. Cada fetch debe dejarlo con SOLO los datos de su tipo.
- *
- * Helper que ejecuta una petición y normaliza el estado del arreglo:
- * - Lo vacía al iniciar (evita mostrar datos de la página anterior).
- * - El backend devuelve 200 con [] cuando no hay registros, así que basta
- *   con asignar la respuesta.
- * - Ante un error real, deja el arreglo vacío y propaga el error.
- */
 const fetchInto = (set) => async (url, filters) => {
   set({ isLoading: true, movimientos: [] })
   try {

@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Animaciones de entrada para los modales */
 @keyframes modal-overlay-in {
   from { opacity: 0; }
   to   { opacity: 1; }
