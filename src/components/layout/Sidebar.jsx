@@ -14,8 +14,8 @@ const linkClass = ({ isActive }) =>
   [
     'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
     isActive
-      ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
-      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/50',
+      ? 'bg-blue-200 text-blue-800 dark:bg-blue-600 dark:text-white'
+      : 'text-gray-600 hover:bg-blue-100 dark:text-gray-400 dark:hover:bg-blue-900 dark:hover:text-gray-200',
   ].join(' ')
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -33,7 +33,7 @@ export default function Sidebar({ isOpen, onClose }) {
       <aside
         className={[
           'fixed inset-y-0 left-0 z-30 flex w-60 flex-col border-r border-gray-200',
-          'bg-white dark:bg-gray-800 dark:border-gray-700 transition-transform duration-200',
+          'bg-surface-sidebar dark:bg-[#111827] dark:border-gray-700 transition-transform duration-200',
           isOpen ? 'translate-x-0' : '-translate-x-full',
           'lg:static lg:translate-x-0',
         ].join(' ')}

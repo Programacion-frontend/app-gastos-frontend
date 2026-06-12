@@ -12,7 +12,7 @@ export default function GuestGuard() {
 
   if (isCheckingAuth) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="flex min-h-screen items-center justify-center bg-surface dark:bg-gray-900">
         <Spinner size="lg" className="text-violet-600" />
       </div>
     )

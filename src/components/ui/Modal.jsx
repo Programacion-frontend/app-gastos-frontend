@@ -36,7 +36,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' })
         aria-labelledby="modal-title"
         className={[
           'relative flex max-h-[90vh] w-full flex-col rounded-2xl shadow-2xl ring-1 ring-black/5',
-          'bg-white dark:bg-gray-800',
+          'bg-surface-card dark:bg-gray-800',
           'border border-gray-200 dark:border-gray-700',
           'animate-panel-in',
           sizeMap[size],

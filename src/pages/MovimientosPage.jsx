@@ -8,17 +8,22 @@ import MovimientoModals from '../components/MovimientoModals'
 import { useFetch, useMovimientoCrud, useErrorToast } from '../hooks'
 import { formatMoney, formatCompact } from '../utils/format'
 
-const PALETTE = ['violet', 'green', 'blue', 'yellow', 'red', 'orange', 'pink', 'gray']
+const PALETTE = ['violet', 'green', 'yellow', 'orange', 'pink']
 const colorCache = {}
 let colorIdx = 0
 const categoryColor = (tipo) => {
+  // Ingresos siempre en azul (primario) y gastos en gris neutro;
+  // el resto de categorías rota sobre la paleta.
+  const t = tipo.toLowerCase()
+  if (t.includes('gasto')) return 'gray'
+  if (t.includes('ingreso')) return 'blue'
   if (!colorCache[tipo]) colorCache[tipo] = PALETTE[colorIdx++ % PALETTE.length]
   return colorCache[tipo]
 }
 
 function SkeletonRow() {
   return (
-    <div className="flex items-center gap-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 animate-pulse">
+    <div className="flex items-center gap-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-surface-card dark:bg-gray-800 p-4 animate-pulse">
       <div className="flex-1 space-y-2">
         <div className="h-4 w-1/2 rounded bg-gray-200 dark:bg-gray-700" />
         <div className="h-3 w-1/3 rounded bg-gray-200 dark:bg-gray-700" />
@@ -37,7 +42,7 @@ function MovimientoCard({ movimiento, onEdit, onDelete }) {
   const simbolo = movimiento.moneda?.simbolo ?? '$'
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+    <div className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-surface-card dark:bg-gray-800 p-4">
       <div className="flex-1 min-w-0">
         <p className="truncate font-medium text-gray-900 dark:text-gray-100">
           {movimiento.descripcion ?? 'Sin descripción'}
@@ -51,7 +56,7 @@ function MovimientoCard({ movimiento, onEdit, onDelete }) {
       <Badge label={tipo} color={color} className="hidden sm:inline-flex shrink-0" />
       {/* Cifra abreviada para no descuadrar la tarjeta; valor completo en el tooltip. */}
       <Tooltip text={`${isGasto ? '-' : '+'}${formatMoney(monto, simbolo)}`} position="top">
-        <span className={`max-w-[7rem] truncate text-base font-bold shrink-0 cursor-default ${isGasto ? 'text-red-500' : 'text-green-500'}`}>
+        <span className="max-w-[7rem] truncate text-base font-bold shrink-0 cursor-default text-gray-900 dark:text-gray-100">
           {isGasto ? '-' : '+'}{formatCompact(monto, { symbol: simbolo })}
         </span>
       </Tooltip>

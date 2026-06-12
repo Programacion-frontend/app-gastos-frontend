@@ -1,5 +1,7 @@
 const colorMap = {
-  violet: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300',
+  // 'violet' usa la paleta purple real: violet-* está aliasado a blue-* en
+  // tailwind.config.js y quedaría idéntico al color 'blue' de abajo.
+  violet: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
   green:  'bg-green-100  text-green-700  dark:bg-green-900/40  dark:text-green-300',
   red:    'bg-red-100    text-red-700    dark:bg-red-900/40    dark:text-red-300',
   yellow: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',

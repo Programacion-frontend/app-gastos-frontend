@@ -42,7 +42,7 @@ export default function GastosPage() {
       label: 'Monto',
       className: 'w-32 whitespace-nowrap',
       render: (m) => (
-        <span className="font-bold tabular-nums text-red-500">
+        <span className="font-bold tabular-nums text-gray-900 dark:text-gray-100">
           -{formatMoney(m.monto)}
         </span>
       ),
@@ -76,7 +76,7 @@ export default function GastosPage() {
         const tipo = m.categoria?.tipo_categoria
         if (!tipo) return <span className="text-gray-400 dark:text-gray-500">—</span>
         return (
-          <span className="inline-flex rounded-full bg-red-50 dark:bg-red-900/30 px-2.5 py-0.5 text-xs font-medium text-red-600 dark:text-red-400">
+          <span className="inline-flex rounded-full bg-gray-100 dark:bg-gray-700 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:text-gray-300">
             {tipo}
           </span>
         )
@@ -154,11 +154,11 @@ export default function GastosPage() {
 
       {rows.length > 0 && (
         <div className="mt-3 flex justify-end">
-          <div className="flex min-w-0 items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 px-4 py-2">
+          <div className="flex min-w-0 items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2">
             <span className="shrink-0 text-sm text-gray-600 dark:text-gray-400">Total:</span>
             {/* Cifra abreviada para no descuadrar la tarjeta; valor completo en el tooltip. */}
             <Tooltip text={`-${formatMoney(total)}`} position="top">
-              <span className="max-w-[10rem] truncate text-base font-bold text-red-600 dark:text-red-400 tabular-nums cursor-default">
+              <span className="max-w-[10rem] truncate text-base font-bold text-gray-900 dark:text-gray-100 tabular-nums cursor-default">
                 -{formatCompact(total)}
               </span>
             </Tooltip>

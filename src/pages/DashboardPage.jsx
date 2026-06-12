@@ -20,8 +20,11 @@ import { buildComparativo, RANGOS } from '../utils/periods'
 
 const CURRENT_YEAR  = new Date().getFullYear()
 const CURRENT_MONTH = new Date().getMonth() + 1
-const CHART_COLORS  = { ingresos: '#22c55e', gastos: '#ef4444' }
-const PIE_COLORS    = [CHART_COLORS.ingresos, CHART_COLORS.gastos]
+// Ingresos en azul (primario) y gastos en gris neutro.
+const CHART_COLORS = {
+  light: { ingresos: '#2563eb', gastos: '#64748b' },
+  dark:  { ingresos: '#3b82f6', gastos: '#94a3b8' },
+}
 
 const PERIODOS = [
   { label: 'Este mes', mes: CURRENT_MONTH, anio: CURRENT_YEAR },
@@ -33,7 +36,7 @@ const fmt = formatMoney
 
 function SkeletonCard() {
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 animate-pulse">
+    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-surface-card dark:bg-gray-800 p-5 animate-pulse">
       <div className="h-3 w-24 rounded bg-gray-200 dark:bg-gray-700 mb-3" />
       <div className="h-7 w-32 rounded bg-gray-200 dark:bg-gray-700 mb-2" />
       <div className="h-3 w-16 rounded bg-gray-200 dark:bg-gray-700" />
@@ -43,7 +46,7 @@ function SkeletonCard() {
 
 function SkeletonChart() {
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 animate-pulse">
+    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-surface-card dark:bg-gray-800 p-5 animate-pulse">
       <div className="h-4 w-32 rounded bg-gray-200 dark:bg-gray-700 mb-4" />
       <div className="h-52 rounded-lg bg-gray-100 dark:bg-gray-700" />
     </div>
@@ -69,7 +72,7 @@ function StatCard({ label, amount, sub, icon: Icon, trend, colorClass, onClick }
         </div>
       </div>
       {trend !== undefined && (
-        <div className={`mt-3 flex items-center gap-1 text-xs font-medium ${trend >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+        <div className={`mt-3 flex items-center gap-1 text-xs font-medium ${trend >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}>
           {trend >= 0 ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}
           {trend >= 0 ? 'Positivo' : 'Negativo'}
         </div>
@@ -81,7 +84,7 @@ function StatCard({ label, amount, sub, icon: Icon, trend, colorClass, onClick }
 const ChartTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 shadow-lg text-xs">
+    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-surface-card dark:bg-gray-800 px-3 py-2 shadow-lg text-xs">
       {label && <p className="mb-1 font-semibold text-gray-700 dark:text-gray-300">{label}</p>}
       {payload.map((p) => (
         <p key={p.name} style={{ color: p.color }} className="flex items-center gap-1">
@@ -117,8 +120,8 @@ export default function DashboardPage() {
 
   const renderActiveShape = useCallback((props) => {
     const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload, value } = props
-    const textColor = isDark ? '#f3f4f6' : '#111827'
-    const subColor  = isDark ? '#9ca3af' : '#6b7280'
+    const textColor = isDark ? '#f8fafc' : '#0f172a'
+    const subColor  = isDark ? '#94a3b8' : '#64748b'
     return (
       <g>
         <text x={cx} y={cy - 10} textAnchor="middle" fill={textColor} fontSize={13} fontWeight={600} fontFamily="inherit">
@@ -141,9 +144,11 @@ export default function DashboardPage() {
   const comparativo = useMemo(() => buildComparativo(movimientos, rango), [movimientos, rango])
   const comparativoVacio = comparativo.every((d) => d.ingresos === 0 && d.gastos === 0)
 
-  const gridColor  = isDark ? '#374151' : '#e5e7eb'
-  const tickColor  = isDark ? '#9ca3af' : '#6b7280'
-  const cursorFill = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'
+  const gridColor   = isDark ? '#334155' : '#e2e8f0'
+  const tickColor   = isDark ? '#94a3b8' : '#64748b'
+  const cursorFill  = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'
+  const chartColors = CHART_COLORS[isDark ? 'dark' : 'light']
+  const pieColors   = [chartColors.ingresos, chartColors.gastos]
 
   const recentColumns = [
     {
@@ -162,7 +167,7 @@ export default function DashboardPage() {
       render: (m) => {
         const isGasto = m.categoria?.tipo_categoria?.toLowerCase().includes('gasto')
         return (
-          <span className={`font-bold tabular-nums ${isGasto ? 'text-red-500' : 'text-green-500 dark:text-green-400'}`}>
+          <span className="font-bold tabular-nums text-gray-900 dark:text-gray-100">
             {isGasto ? '-' : '+'}{fmt(m.monto)}
           </span>
         )
@@ -200,8 +205,8 @@ export default function DashboardPage() {
         return (
           <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
             isGasto
-              ? 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-              : 'bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400'
+              ? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+              : 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
           }`}>
             {tipo}
           </span>
@@ -260,7 +265,7 @@ export default function DashboardPage() {
             amount={b.totalGastos}
             sub={`${b.estadisticas.cantidadGastos} movimientos · Prom: ${fmt(b.estadisticas.promedioGasto)}`}
             icon={TrendingDown}
-            colorClass="bg-red-100 text-red-500 dark:bg-red-900/30"
+            colorClass="bg-gray-100 text-gray-500 dark:bg-gray-700/50 dark:text-gray-400"
             onClick={() => navigate('/dashboard/gastos')}
           />
           <StatCard
@@ -268,7 +273,7 @@ export default function DashboardPage() {
             amount={b.totalIngresos}
             sub={`${b.estadisticas.cantidadIngresos} movimientos · Prom: ${fmt(b.estadisticas.promedioIngreso)}`}
             icon={TrendingUp}
-            colorClass="bg-green-100 text-green-500 dark:bg-green-900/30"
+            colorClass="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
             onClick={() => navigate('/dashboard/ingresos')}
           />
           <StatCard
@@ -278,8 +283,8 @@ export default function DashboardPage() {
             icon={Wallet}
             trend={b.balance}
             colorClass={b.balance >= 0
-              ? 'bg-violet-100 text-violet-600 dark:bg-violet-900/30'
-              : 'bg-red-100 text-red-500 dark:bg-red-900/30'}
+              ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+              : 'bg-gray-100 text-gray-500 dark:bg-gray-700/50 dark:text-gray-400'}
           />
         </div>
       ) : null}
@@ -295,11 +300,11 @@ export default function DashboardPage() {
               <Card.Title>Distribución</Card.Title>
               <div className="flex gap-3 text-xs">
                 <span className="flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-green-500" />
+                  <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-500" />
                   <span className="text-gray-600 dark:text-gray-400">Ingresos</span>
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-red-500" />
+                  <span className="h-2 w-2 rounded-full bg-gray-500 dark:bg-gray-400" />
                   <span className="text-gray-600 dark:text-gray-400">Gastos</span>
                 </span>
               </div>
@@ -320,7 +325,7 @@ export default function DashboardPage() {
                       onMouseEnter={(_, i) => setPieIndex(i)}
                     >
                       {b.graficas.circular.map((_, i) => (
-                        <Cell key={i} fill={PIE_COLORS[i]} />
+                        <Cell key={i} fill={pieColors[i]} />
                       ))}
                     </Pie>
                   </PieChart>
@@ -362,8 +367,8 @@ export default function DashboardPage() {
                     <YAxis tick={{ fontSize: 11, fill: tickColor }} tickFormatter={(v) => formatCompact(v)} width={56} />
                     <Tooltip content={<ChartTooltip />} cursor={{ fill: cursorFill }} />
                     <Legend wrapperStyle={{ fontSize: 12, color: tickColor }} />
-                    <Bar dataKey="ingresos" fill={CHART_COLORS.ingresos} radius={[3,3,0,0]} name="Ingresos" />
-                    <Bar dataKey="gastos"   fill={CHART_COLORS.gastos}   radius={[3,3,0,0]} name="Gastos" />
+                    <Bar dataKey="ingresos" fill={chartColors.ingresos} radius={[3,3,0,0]} name="Ingresos" />
+                    <Bar dataKey="gastos"   fill={chartColors.gastos}   radius={[3,3,0,0]} name="Gastos" />
                   </BarChart>
                 </ResponsiveContainer>
               )}

@@ -98,7 +98,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 py-10">
+    <div className="flex min-h-screen items-center justify-center bg-surface dark:bg-gray-900 px-4 py-10">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -109,7 +109,7 @@ export default function RegisterPage() {
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Crea tu cuenta gratuita</p>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 shadow-sm">
+        <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-surface-card dark:bg-gray-800 p-8 shadow-sm">
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
             <Input
               id="nombre_completo"
