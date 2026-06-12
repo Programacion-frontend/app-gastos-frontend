@@ -6,6 +6,7 @@ import useCategoryStore from '../store/useCategoryStore'
 import { Card, Button, Spinner, Table, Tooltip } from '../components/ui'
 import MovimientoModals from '../components/MovimientoModals'
 import { useFetch, useMovimientoCrud } from '../hooks'
+import { formatMoney, formatCompact } from '../utils/format'
 
 export default function GastosPage() {
   const { movimientos, isLoading, fetchGastos } = useExpenseStore()
@@ -24,6 +25,8 @@ export default function GastosPage() {
     (m.descripcion ?? '').toLowerCase().includes(search.toLowerCase())
   )
 
+  const total = rows.reduce((s, m) => s + Number(m.monto), 0)
+
   const columns = [
     {
       key: 'descripcion',
@@ -40,7 +43,7 @@ export default function GastosPage() {
       className: 'w-32 whitespace-nowrap',
       render: (m) => (
         <span className="font-bold tabular-nums text-red-500">
-          -${Number(m.monto).toLocaleString('es-CO', { minimumFractionDigits: 2 })}
+          -{formatMoney(m.monto)}
         </span>
       ),
     },
@@ -151,11 +154,14 @@ export default function GastosPage() {
 
       {rows.length > 0 && (
         <div className="mt-3 flex justify-end">
-          <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 px-4 py-2">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Total:</span>
-            <span className="text-base font-bold text-red-600 dark:text-red-400 tabular-nums">
-              -${rows.reduce((s, m) => s + Number(m.monto), 0).toLocaleString('es-CO', { minimumFractionDigits: 2 })}
-            </span>
+          <div className="flex min-w-0 items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 px-4 py-2">
+            <span className="shrink-0 text-sm text-gray-600 dark:text-gray-400">Total:</span>
+            {/* Cifra abreviada para no descuadrar la tarjeta; valor completo en el tooltip. */}
+            <Tooltip text={`-${formatMoney(total)}`} position="top">
+              <span className="max-w-[10rem] truncate text-base font-bold text-red-600 dark:text-red-400 tabular-nums cursor-default">
+                -{formatCompact(total)}
+              </span>
+            </Tooltip>
           </div>
         </div>
       )}

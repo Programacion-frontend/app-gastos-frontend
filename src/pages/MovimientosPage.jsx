@@ -3,9 +3,10 @@ import { Plus, Pencil, Trash2, Search, AlertCircle, SlidersHorizontal } from 'lu
 
 import useExpenseStore  from '../store/useExpenseStore'
 import useCategoryStore from '../store/useCategoryStore'
-import { Card, Badge, Button } from '../components/ui'
+import { Card, Badge, Button, Tooltip } from '../components/ui'
 import MovimientoModals from '../components/MovimientoModals'
 import { useFetch, useMovimientoCrud, useErrorToast } from '../hooks'
+import { formatMoney, formatCompact } from '../utils/format'
 
 const PALETTE = ['violet', 'green', 'blue', 'yellow', 'red', 'orange', 'pink', 'gray']
 const colorCache = {}
@@ -33,6 +34,7 @@ function MovimientoCard({ movimiento, onEdit, onDelete }) {
   const color   = categoryColor(tipo)
   const monto   = Number(movimiento.monto ?? 0)
   const isGasto = tipo.toLowerCase().includes('gasto')
+  const simbolo = movimiento.moneda?.simbolo ?? '$'
 
   return (
     <div className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
@@ -47,9 +49,12 @@ function MovimientoCard({ movimiento, onEdit, onDelete }) {
         </p>
       </div>
       <Badge label={tipo} color={color} className="hidden sm:inline-flex shrink-0" />
-      <span className={`text-base font-bold shrink-0 ${isGasto ? 'text-red-500' : 'text-green-500'}`}>
-        {isGasto ? '-' : '+'}{movimiento.moneda?.simbolo ?? '$'}{monto.toFixed(2)}
-      </span>
+      {/* Cifra abreviada para no descuadrar la tarjeta; valor completo en el tooltip. */}
+      <Tooltip text={`${isGasto ? '-' : '+'}${formatMoney(monto, simbolo)}`} position="top">
+        <span className={`max-w-[7rem] truncate text-base font-bold shrink-0 cursor-default ${isGasto ? 'text-red-500' : 'text-green-500'}`}>
+          {isGasto ? '-' : '+'}{formatCompact(monto, { symbol: simbolo })}
+        </span>
+      </Tooltip>
       <div className="flex items-center gap-1 shrink-0">
         <button
           onClick={() => onEdit(movimiento)}
@@ -161,9 +166,14 @@ export default function MovimientosPage() {
       </Card>
 
       {movimientos.length > 0 && (
-        <div className="mb-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-          <span>{movimientos.length} movimientos encontrados</span>
-          <span className="font-medium text-gray-900 dark:text-gray-100">Total: ${total.toFixed(2)}</span>
+        <div className="mb-4 flex min-w-0 items-center justify-between gap-3 text-sm text-gray-500 dark:text-gray-400">
+          <span className="shrink-0">{movimientos.length} movimientos encontrados</span>
+          {/* Cifra abreviada para no descuadrar; valor completo en el tooltip. */}
+          <Tooltip text={`Total: ${formatMoney(total)}`} position="top">
+            <span className="max-w-[10rem] truncate font-medium text-gray-900 dark:text-gray-100 cursor-default">
+              Total: {formatCompact(total)}
+            </span>
+          </Tooltip>
         </div>
       )}
 

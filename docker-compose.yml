@@ -1,0 +1,15 @@
+# Compose individual del frontend (app-gastos-frontend): SPA servida con nginx.
+# Asume que el backend ya corre en http://localhost:8080/api (vía
+# app-gastos/docker-compose.yml, "npm run start:dev" local, etc.), ya que
+# la URL del API está fijada en src/utils/axios.js.
+# Para levantar TODO el stack (backend + frontend + mysql) usa
+# ../docker-compose.yml desde la carpeta MIGASTO/.
+name: app-gastos-frontend
+
+services:
+  frontend:
+    build:
+      context: .
+    restart: unless-stopped
+    ports:
+      - "5173:80"

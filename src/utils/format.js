@@ -3,26 +3,28 @@
  */
 
 /** Monto completo en pesos: "$1.200.000,00". */
-export function formatMoney(n = 0) {
-  return `$${Number(n).toLocaleString('es-CO', {
+export function formatMoney(n = 0, symbol = '$') {
+  return `${symbol}${Number(n).toLocaleString('es-CO', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`
 }
 
 /**
- * Abrevia cifras grandes para que no descuadren las tarjetas de KPIs.
+ * Abrevia cifras grandes para que no descuadren las tarjetas/KPIs.
  * Ej: 1_200_000 -> "$1.2M", 350_000 -> "$350K", 4_500_000_000 -> "$4.5B".
  * Para montos pequeños devuelve el valor completo con separador de miles.
  *
  * @param {number} n
- * @param {{ currency?: boolean }} [opts] - anteponer "$" (por defecto true)
+ * @param {{ currency?: boolean, symbol?: string }} [opts]
+ *   - currency: anteponer el símbolo (por defecto true)
+ *   - symbol: símbolo a anteponer, ej. el de la moneda del movimiento (por defecto "$")
  */
-export function formatCompact(n, { currency = true } = {}) {
+export function formatCompact(n, { currency = true, symbol = '$' } = {}) {
   const num = Number(n) || 0
   const sign = num < 0 ? '-' : ''
   const abs = Math.abs(num)
-  const prefix = currency ? '$' : ''
+  const prefix = currency ? symbol : ''
 
   const trim = (v) => {
     // 1 decimal, sin ".0" sobrante
