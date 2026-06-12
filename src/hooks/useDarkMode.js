@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 export function useDarkMode() {
   const [isDark, setIsDark] = useState(() =>
-    document.documentElement.classList.contains('dark')
+    typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
   )
 
   useEffect(() => {

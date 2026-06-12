@@ -2,6 +2,10 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import api from '../utils/axios'
 
+// En el prerender de build (Node, sin window/localStorage) usamos un storage
+// noop para que zustand/persist no truene al inicializarse.
+const noopStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} }
+
 const resetDataStores = async () => {
   const [
     { default: useExpenseStore },
@@ -78,7 +82,7 @@ const useAuthStore = create(
     }),
     {
       name: 'migasto-auth',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => (typeof window !== 'undefined' ? localStorage : noopStorage)),
       // Solo persistimos lo necesario para pintar la UI al instante.
       partialize: (state) => ({
         user: state.user,
