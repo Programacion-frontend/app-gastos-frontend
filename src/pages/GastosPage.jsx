@@ -1,46 +1,18 @@
 import { useState } from 'react'
 import { Plus, Pencil, Trash2, Search } from 'lucide-react'
-import toast from 'react-hot-toast'
 
 import useExpenseStore  from '../store/useExpenseStore'
 import useCategoryStore from '../store/useCategoryStore'
-import { Card, Button, Modal, Spinner, Table, Tooltip } from '../components/ui'
-import MovimientoForm   from '../components/MovimientoForm'
-import { useFetch, useModal, useErrorToast } from '../hooks'
-
-function DeleteConfirm({ movimiento, onConfirm, onCancel, isDeleting }) {
-  return (
-    <div className="space-y-4">
-      <p className="text-sm text-gray-600 dark:text-gray-400">
-        ¿Eliminar el gasto{' '}
-        <strong className="text-gray-900 dark:text-gray-100">
-          "{movimiento?.descripcion ?? 'sin descripción'}"
-        </strong>
-        ? Esta acción no se puede deshacer.
-      </p>
-      <div className="flex justify-end gap-3">
-        <Button variant="secondary" onClick={onCancel} disabled={isDeleting}>Cancelar</Button>
-        <Button variant="danger" onClick={onConfirm} isLoading={isDeleting} disabled={isDeleting}>
-          {isDeleting ? 'Eliminando...' : 'Eliminar'}
-        </Button>
-      </div>
-    </div>
-  )
-}
+import { Card, Button, Spinner, Table, Tooltip } from '../components/ui'
+import MovimientoModals from '../components/MovimientoModals'
+import { useFetch, useMovimientoCrud } from '../hooks'
 
 export default function GastosPage() {
-  const {
-    movimientos, isLoading,
-    fetchGastos, createMovimiento, updateMovimiento, deleteMovimiento,
-  } = useExpenseStore()
-
+  const { movimientos, isLoading, fetchGastos } = useExpenseStore()
   const { categorias, fetchCategorias } = useCategoryStore()
 
-  const errorToast = useErrorToast()
-  const {
-    modalMode, selected, isDeleting, setIsDeleting,
-    openCreate, openEdit, openDelete, closeModal,
-  } = useModal()
+  const crud = useMovimientoCrud({ label: 'gasto' })
+  const { openCreate, openEdit, openDelete } = crud
 
   const [search, setSearch] = useState('')
 
@@ -51,47 +23,6 @@ export default function GastosPage() {
     !search.trim() ||
     (m.descripcion ?? '').toLowerCase().includes(search.toLowerCase())
   )
-
-  const handleCreate = async (data) => {
-    try {
-      await createMovimiento(data)
-      toast.success('Gasto creado')
-      closeModal()
-    } catch (err) {
-      errorToast(err, 'Error al crear')
-    }
-  }
-
-  const handleEdit = async (data) => {
-    try {
-      await updateMovimiento(selected.id_movimiento, data)
-      toast.success('Gasto actualizado')
-      closeModal()
-    } catch (err) {
-      errorToast(err, 'Error al actualizar')
-    }
-  }
-
-  const handleDelete = async () => {
-    setIsDeleting(true)
-    try {
-      await deleteMovimiento(selected.id_movimiento)
-      toast.success('Gasto eliminado')
-      closeModal()
-    } catch (err) {
-      errorToast(err, 'Error al eliminar')
-    } finally {
-      setIsDeleting(false)
-    }
-  }
-
-  const editDefaults = selected ? {
-    monto:        selected.monto,
-    fecha:        selected.fecha?.split('T')[0] ?? selected.fecha,
-    descripcion:  selected.descripcion ?? '',
-    id_categoria: selected.categoria?.id_categoria ?? '',
-    id_moneda:    selected.moneda?.id_moneda ?? '',
-  } : undefined
 
   const columns = [
     {
@@ -229,33 +160,7 @@ export default function GastosPage() {
         </div>
       )}
 
-      <Modal isOpen={modalMode === 'create'} onClose={closeModal} title="Nuevo gasto" size="md">
-        <MovimientoForm tipo="gasto" categorias={categorias} onSubmit={handleCreate} onCancel={closeModal} />
-      </Modal>
-
-      <Modal isOpen={modalMode === 'edit'} onClose={closeModal} title="Editar gasto" size="md">
-        {selected && (
-          <MovimientoForm
-            key={selected.id_movimiento}
-            tipo="gasto"
-            categorias={categorias}
-            defaultValues={editDefaults}
-            onSubmit={handleEdit}
-            onCancel={closeModal}
-          />
-        )}
-      </Modal>
-
-      <Modal isOpen={modalMode === 'delete'} onClose={closeModal} title="Eliminar gasto" size="sm">
-        {selected && (
-          <DeleteConfirm
-            movimiento={selected}
-            onConfirm={handleDelete}
-            onCancel={closeModal}
-            isDeleting={isDeleting}
-          />
-        )}
-      </Modal>
+      <MovimientoModals tipo="gasto" label="gasto" categorias={categorias} crud={crud} />
     </div>
   )
 }
