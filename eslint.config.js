@@ -40,4 +40,10 @@ export default defineConfig([
       ],
     },
   },
+  {
+    files: ['*.config.js', 'e2e/**/*.js'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ])
