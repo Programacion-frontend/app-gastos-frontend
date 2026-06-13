@@ -1,0 +1,20 @@
+# Compose individual del frontend (app-gastos-frontend): React Router v7 en
+# modo framework (SSR), servido con react-router-serve en el puerto 3000.
+# Asume que el backend ya corre en http://localhost:8080/api (vía
+# app-gastos/docker-compose.yml, "npm run start:dev" local, etc.).
+# La URL del API se inyecta en build-time vía VITE_API_URL (ver .env).
+# Para levantar TODO el stack (backend + frontend + mysql) usa
+# ../docker-compose.yml desde la carpeta MIGASTO/.
+name: app-gastos-frontend
+
+services:
+  frontend:
+    build:
+      context: .
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8080/api}
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"

@@ -1,0 +1,1 @@
+import{n as e}from"./rolldown-runtime-S-ySWqyJ.js";import{n as t,t as n}from"./axios-G6N-rQIT.js";var r=e({default:()=>i}),i=t(e=>({categorias:[],isLoading:!1,fetchCategorias:async()=>{e({isLoading:!0});try{let{data:t}=await n.get(`/categoria`);e({categorias:t,isLoading:!1})}catch{e({isLoading:!1})}}}));export{r as n,i as t};
