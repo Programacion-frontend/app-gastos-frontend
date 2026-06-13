@@ -5,19 +5,23 @@ const api = axios.create({
   withCredentials: true,
 })
 
-
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isLogoutRequest = error.config?.url?.includes('/auth/logout')
+
+    if (error.response?.status === 401 && !isLogoutRequest) {
       import('../store/useAuthStore').then(({ default: useAuthStore }) => {
-        const { isAuthenticated } = useAuthStore.getState()
-        if (isAuthenticated) {
-          useAuthStore.setState({ user: null, isAuthenticated: false })
-          window.location.replace('/login')
-        }
+        if (!useAuthStore.getState().isAuthenticated) return
+
+        api.post('/auth/logout').catch(() => {})
+        useAuthStore.setState({ user: null, isAuthenticated: false, isCheckingAuth: false })
+        localStorage.clear()
+        sessionStorage.clear()
+        window.location.href = '/login'
       })
     }
+
     return Promise.reject(error)
   }
 )

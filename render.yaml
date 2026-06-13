@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: app-gastos-frontend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    branch: main
+    dockerBuildArgs:
+      VITE_API_URL: https://app-gastos-api.onrender.com/api
+
