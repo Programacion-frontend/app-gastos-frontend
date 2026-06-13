@@ -8,8 +8,5 @@ services:
     branch: main
     envVars:
       - key: VITE_API_URL
-        value: https://app-gastos-api.onrender.com/api
-        # ^ Actualiza con la URL real del backend en Render una vez creado.
-        # Render pasa las env vars del servicio como --build-arg para cada ARG
-        # declarado en el Dockerfile (este Dockerfile ya tiene "ARG VITE_API_URL").
+        value: https://app-gastos-api-wyks.onrender.com/api
 
